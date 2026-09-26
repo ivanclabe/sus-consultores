@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual de uso — Estados Financieros SusConsultores</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm; }
+  @page :first { margin: 0; }
+
+  :root {
+    --tinta: #1b2028;
+    --suave: #667085;
+    --borde: #dfe3e8;
+    --acento: #1f5f8b;
+    --acento-claro: #eaf2f8;
+    --ok: #1a7f4b;
+    --ok-claro: #e8f5ee;
+    --alerta: #9a6700;
+    --alerta-claro: #fdf6e3;
+    --error: #b3261e;
+    --error-claro: #fdeceb;
+    --ia: #6b3fa0;
+    --ia-claro: #f3eefc;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--tinta); font-size: 10pt; line-height: 1.55;
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, h4 { margin: 0 0 6px; line-height: 1.25; letter-spacing: -0.012em; }
+  h2 { font-size: 17pt; color: var(--acento); margin-top: 0; }
+  h3 { font-size: 12pt; margin-top: 20px; }
+  h4 { font-size: 10pt; margin-top: 14px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 18px; }
+  li { margin-bottom: 4px; }
+  code { font-family: 'SF Mono', Menlo, monospace; font-size: 8.5pt;
+         background: #f1f3f5; padding: 1px 4px; border-radius: 3px; }
+  strong { font-weight: 650; }
+
+  /* ---------- portada ---------- */
+  .portada {
+    height: 297mm; padding: 42mm 22mm 20mm; display: flex; flex-direction: column;
+    background: linear-gradient(160deg, #1f5f8b 0%, #14405f 100%); color: #fff;
+  }
+  .portada .kicker { font-size: 10pt; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.72; }
+  .portada h1 { font-size: 34pt; font-weight: 600; margin: 14px 0 10px; color: #fff; }
+  .portada .sub { font-size: 13pt; opacity: 0.88; max-width: 118mm; line-height: 1.5; }
+  .portada .regla { height: 3px; width: 56px; background: #8fc4e6; margin: 26px 0; }
+  .portada .pie { margin-top: auto; font-size: 9.5pt; opacity: 0.8; }
+  .portada .pie b { display: block; font-weight: 600; opacity: 1; margin-bottom: 2px; }
+  .indice { margin-top: 30px; font-size: 10.5pt; }
+  .indice div { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.18); opacity: 0.92; }
+  .indice span { display: inline-block; width: 26px; opacity: 0.65; }
+
+  /* ---------- estructura ---------- */
+  section { page-break-before: always; }
+  .cabecera {
+    display: flex; align-items: baseline; gap: 10px; border-bottom: 2px solid var(--acento);
+    padding-bottom: 6px; margin-bottom: 16px;
+  }
+  .cabecera .n {
+    background: var(--acento); color: #fff; width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10pt; font-weight: 700; flex: none; align-self: center;
+  }
+  .lead { font-size: 11pt; color: #3d4753; margin-bottom: 14px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0 0 12px; font-size: 9pt; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { background: #f6f7f9; font-size: 7.8pt; text-transform: uppercase;
+       letter-spacing: 0.05em; color: var(--suave); font-weight: 700; }
+  td.c { text-align: center; }
+  tbody tr:nth-child(even) td { background: #fbfcfd; }
+
+  .caja { border: 1px solid var(--borde); border-radius: 6px; padding: 11px 13px; margin: 0 0 12px; }
+  .caja > :last-child { margin-bottom: 0; }
+  .caja.nota  { background: var(--acento-claro); border-color: #c5ddec; }
+  .caja.ok    { background: var(--ok-claro);     border-color: #bfe3ce; }
+  .caja.ojo   { background: var(--alerta-claro); border-color: #eedba6; }
+  .caja.stop  { background: var(--error-claro);  border-color: #f3c6c3; }
+  .caja b.tit { display: block; font-size: 8pt; text-transform: uppercase;
+                letter-spacing: 0.07em; margin-bottom: 4px; }
+  .caja.nota b.tit { color: var(--acento); }
+  .caja.ok   b.tit { color: var(--ok); }
+  .caja.ojo  b.tit { color: var(--alerta); }
+  .caja.stop b.tit { color: var(--error); }
+
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 99px; font-size: 7.5pt;
+          font-weight: 700; border: 1px solid var(--borde); white-space: nowrap; }
+  .pill.regla   { background: var(--acento-claro); border-color: #c5ddec; color: var(--acento); }
+  .pill.memoria { background: var(--ok-claro);     border-color: #bfe3ce; color: var(--ok); }
+  .pill.ia      { background: var(--ia-claro);     border-color: #ddd0f2; color: var(--ia); }
+  .pill.manual  { background: #eef1f4; color: #4a5560; }
+  .pill.pend    { background: var(--alerta-claro); border-color: #eedba6; color: var(--alerta); }
+
+  /* ---------- maqueta de pantalla ---------- */
+  .pantalla {
+    border: 1px solid #cdd4da; border-radius: 7px; overflow: hidden;
+    margin: 0 0 8px; background: #fff; font-size: 8pt; page-break-inside: avoid;
+  }
+  .pantalla .top { background: #eef1f4; border-bottom: 1px solid #cdd4da; padding: 5px 9px;
+                   display: flex; align-items: center; gap: 5px; }
+  .pantalla .top i { width: 7px; height: 7px; border-radius: 50%; background: #cdd4da; display: inline-block; }
+  .pantalla .top span { margin-left: 6px; color: var(--suave); font-style: normal; font-size: 7.5pt; }
+  .pantalla .cuerpo { padding: 11px 13px; background: #f6f7f9; }
+  .pantalla .tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 5px; padding: 9px 11px; margin-bottom: 8px; }
+  .pantalla .tarjeta:last-child { margin-bottom: 0; }
+  .pasos-ui { display: flex; gap: 4px; margin-bottom: 8px; }
+  .pasos-ui div { border: 1px solid var(--borde); border-radius: 99px; padding: 3px 10px;
+                  background: #fff; color: var(--suave); font-size: 7.5pt; }
+  .pasos-ui div.on { border-color: var(--acento); background: var(--acento-claro);
+                     color: var(--acento); font-weight: 700; }
+  .metricas { display: flex; gap: 6px; margin-bottom: 8px; }
+  .metricas div { border: 1px solid var(--borde); border-radius: 5px; padding: 6px 9px; flex: 1; background: #fff; }
+  .metricas b { display: block; font-size: 13pt; line-height: 1.1; }
+  .metricas span { font-size: 7pt; color: var(--suave); }
+  .mini { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin: 0; }
+  .mini th, .mini td { padding: 3px 5px; border-bottom: 1px solid #eceff2; }
+  .mini th { background: none; font-size: 6.8pt; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .campo-ui { display: inline-block; border: 1px solid var(--borde); border-radius: 4px;
+              padding: 2px 7px; background: #fff; margin-right: 5px; font-size: 7.5pt; }
+  .boton-ui { display: inline-block; border-radius: 4px; padding: 3px 10px;
+              background: var(--acento); color: #fff; font-size: 7.5pt; font-weight: 600; }
+  .boton-ui.gris { background: #fff; color: var(--tinta); border: 1px solid var(--borde); font-weight: 400; }
+
+  .marca { display: inline-flex; align-items: center; justify-content: center;
+           width: 14px; height: 14px; border-radius: 50%; background: var(--acento);
+           color: #fff; font-size: 7.5pt; font-weight: 700; margin-right: 5px; flex: none; }
+  .llamadas { margin: 0 0 14px; padding: 0; list-style: none; font-size: 9pt; }
+  .llamadas li { display: flex; margin-bottom: 5px; }
+  .llamadas .marca { margin-top: 1px; }
+
+  .flujo { display: flex; align-items: stretch; gap: 6px; margin: 0 0 14px; }
+  .flujo .f { flex: 1; border: 1px solid var(--borde); border-radius: 6px; padding: 9px;
+              background: #fff; text-align: center; font-size: 8.5pt; }
+  .flujo .f b { display: block; color: var(--acento); margin-bottom: 2px; font-size: 9pt; }
+  .flujo .f span { color: var(--suave); font-size: 7.5pt; }
+  .flujo .a { align-self: center; color: #b6bfc8; font-size: 12pt; }
+  .evitar-corte { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <div class="kicker">SusConsultores · Manual de uso</div>
+  <h1>Estados Financieros</h1>
+  <div class="sub">Del balance de comprobación de Siigo al informe que se envía al cliente, sin transcribir cuentas a mano.</div>
+  <div class="regla"></div>
+  <div class="indice">
+    <div><span>1</span> Qué hace esta herramienta — y qué no</div>
+    <div><span>2</span> Antes de empezar: el archivo</div>
+    <div><span>3</span> El recorrido completo, de un vistazo</div>
+    <div><span>4</span> Ingreso</div>
+    <div><span>5</span> Paso 1 — Cargar el balance</div>
+    <div><span>6</span> Paso 2 — Clasificar las cuentas</div>
+    <div><span>7</span> Paso 3 — Estados, validaciones y aprobación</div>
+    <div><span>8</span> Las validaciones, una por una</div>
+    <div><span>9</span> Problemas frecuentes</div>
+    <div><span>10</span> Glosario</div>
+    <div><span>11</span> Lo que todavía falta definir</div>
+  </div>
+  <div class="pie">
+    <b>Versión 1.0 · 22 de septiembre de 2026</b>
+    Documento de trabajo. La herramienta está en construcción y algunos criterios
+    siguen pendientes de acordar con SusConsultores (capítulo 11).
+  </div>
+</div>
+
+<section>
+  <div class="cabecera"><span class="n">1</span><h2>Qué hace esta herramienta — y qué no</h2></div>
+  <p class="lead">
+    Toma el balance de comprobación que usted exporta de Siigo y arma con él las tres
+    hojas que hoy presenta: <strong>Notas</strong>, <strong>Balance / ESF</strong> y
+    <strong>Estado de Resultados</strong>. Usted revisa, corrige y aprueba; después
+    descarga el Excel o guarda el PDF.
+  </p>
+
+  <h3>Lo que hace por usted</h3>
+  <ul>
+    <li>Lee el balance de comprobación y separa las cuentas del nivel más profundo, sin contar dos veces los totales intermedios.</li>
+    <li>Decide a qué rubro del formato y a qué número de nota pertenece cada cuenta.</li>
+    <li>Suma cada nota y lleva ese total a la línea correspondiente del estado.</li>
+    <li>Omite los rubros de los que la empresa no tiene nada.</li>
+    <li>Revisa que todo cuadre antes de dejarla aprobar.</li>
+  </ul>
+
+  <h3>Lo que sigue siendo suyo</h3>
+  <ul>
+    <li>Exportar el archivo desde Siigo.</li>
+    <li>Revisar la clasificación propuesta y corregir lo que esté mal.</li>
+    <li>Aprobar. <strong>Sin su aprobación no existe documento final.</strong></li>
+    <li>Enviar el informe al cliente.</li>
+  </ul>
+
+  <div class="caja nota">
+    <b class="tit">La regla que ordena todo</b>
+    <p style="margin:0">
+      La inteligencia artificial solo <strong>propone etiquetas</strong>: dice a qué rubro
+      cree que va una cuenta. <strong>Nunca calcula ni modifica una cifra.</strong> De hecho
+      ni siquiera recibe los saldos — solo el código y el nombre de la cuenta. Todas las
+      sumas las hace el programa con aritmética normal, sobre los saldos tal como vienen
+      del archivo.
+    </p>
+  </div>
+
+  <h3>Lo que esta versión todavía no hace</h3>
+  <table>
+    <tr><td style="width:46%">Conectarse directamente a Siigo</td><td>Usted sigue exportando el archivo a mano.</td></tr>
+    <tr><td>Procesar varias empresas a la vez</td><td>Un informe por vez.</td></tr>
+    <tr><td>Redactar el texto de las notas</td><td>Solo arma las cifras y su detalle.</td></tr>
+    <tr><td>Reproducir el formato institucional exacto</td><td>Presenta la información con un formato propio, legible e imprimible. Falta el archivo de referencia para replicar el suyo.</td></tr>
+    <tr><td>Guardar el archivo que usted carga</td><td>Se guardan las cuentas, no el archivo. Es la opción más prudente mientras no se decida otra cosa.</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">2</span><h2>Antes de empezar: el archivo</h2></div>
+  <p class="lead">
+    La herramienta trabaja sobre <strong>una sola hoja</strong>: el balance de comprobación.
+    Todo lo demás del libro lo ignora.
+  </p>
+
+  <h3>Lista de verificación</h3>
+  <table>
+    <thead><tr><th style="width:42%">Revise esto</th><th>Por qué importa</th></tr></thead>
+    <tbody>
+      <tr><td>El archivo abre bien en <strong>otro computador</strong></td>
+          <td>Si las celdas están enlazadas a otro archivo de su equipo, llegan vacías o con error y la herramienta rechaza el archivo. Guárdelo con los datos adentro.</td></tr>
+      <tr><td>Está la hoja del <strong>balance de comprobación</strong></td>
+          <td>Es la única fuente de datos. Puede llamarse <code>BC Comprobación</code> o parecido; la herramienta la busca por su contenido, no por el nombre.</td></tr>
+      <tr><td>Tiene las columnas de <strong>niveles</strong></td>
+          <td>Grupo, cuenta, subcuenta, auxiliar, subauxiliar. Con al menos dos de ellas alcanza.</td></tr>
+      <tr><td>Tiene la columna de <strong>saldo de cierre</strong></td>
+          <td>La que usted llama <em>nuevo saldo</em>. Es el valor que se traslada.</td></tr>
+      <tr><td>Los <strong>nombres de las cuentas</strong> vienen escritos</td>
+          <td>Es lo que se muestra en las notas: <em>BBVA CTA 5996</em>, <em>CAJA BARRANQUILLA</em>. La herramienta no los cambia ni los generaliza.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja ok">
+    <b class="tit">No hace falta limpiar el archivo</b>
+    <p style="margin:0">
+      Las hojas de validación que usted pega para cotejar (<code>ESF 2024</code>,
+      <code>EER 2024</code>) pueden quedarse: la herramienta no las mira. Tampoco estorban
+      los títulos de arriba, las filas en blanco, ni las filas de totales intermedios.
+    </p>
+  </div>
+
+  <h3>Si cada empresa trae el archivo distinto</h3>
+  <p>
+    Está previsto. La estructura del balance de comprobación de Siigo es la misma, pero las
+    cuentas cambian: una empresa tiene una caja y otra cinco; una trabaja con Bancolombia y
+    otra con BBVA; una no tiene cartera. Nada de eso hay que configurarlo. Y si alguna vez
+    las columnas vienen corridas, usted las corrige en pantalla (capítulo 5).
+  </p>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">3</span><h2>El recorrido completo, de un vistazo</h2></div>
+
+  <div class="flujo">
+    <div class="f"><b>Paso 1</b>Cargar<span>elige el Excel y confirma lo que se detectó</span></div>
+    <div class="a">→</div>
+    <div class="f"><b>Paso 2</b>Clasificar<span>revisa y corrige a qué rubro va cada cuenta</span></div>
+    <div class="a">→</div>
+    <div class="f"><b>Paso 3</b>Aprobar<span>verifica los estados y descarga el informe</span></div>
+  </div>
+
+  <h3>Cuánto trabajo es suyo en cada paso</h3>
+  <table>
+    <thead><tr><th style="width:15%">Paso</th><th style="width:42%">Hace la herramienta</th><th>Hace usted</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1. Cargar</strong></td>
+          <td>Encuentra la hoja, los encabezados y las columnas. Separa las cuentas del nivel más profundo.</td>
+          <td>Elige el archivo, la empresa y el periodo. Mira si lo detectado tiene sentido.</td></tr>
+      <tr><td><strong>2. Clasificar</strong></td>
+          <td>Asigna un rubro a cada cuenta: primero lo que usted ya confirmó antes, luego las reglas por código, y solo lo que sobra se lo pregunta al modelo.</td>
+          <td>Revisa lo dudoso — que viene filtrado — y corrige. Lo que corrige queda aprendido.</td></tr>
+      <tr><td><strong>3. Aprobar</strong></td>
+          <td>Arma notas y estados, y corre las validaciones.</td>
+          <td>Lee el tablero, revisa las tres hojas, aprueba y descarga.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja ojo">
+    <b class="tit">La primera vez con una empresa será la más lenta</b>
+    <p style="margin:0">
+      En el primer informe de una empresa usted corregirá varias cuentas. Cada corrección
+      queda guardada para esa empresa, así que en el siguiente periodo esas mismas cuentas
+      llegan ya resueltas y no se le vuelven a preguntar.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">4</span><h2>Ingreso</h2></div>
+  <p class="lead">La herramienta pide correo y contraseña. Son las credenciales que le entregó el equipo técnico.</p>
+
+  <div class="pantalla" style="max-width:88mm;margin:0 auto 10px">
+    <div class="top"><i></i><i></i><i></i><span>Estados Financieros — SusConsultores</span></div>
+    <div class="cuerpo" style="padding:16px 18px">
+      <div class="tarjeta">
+        <div style="font-weight:650;font-size:10pt;margin-bottom:2px">Estados Financieros</div>
+        <div style="color:var(--suave);font-size:7.5pt;margin-bottom:9px">SusConsultores — acceso del equipo contable.</div>
+        <div style="color:var(--suave);font-size:7pt">Correo</div>
+        <div style="border:1px solid var(--borde);border-radius:4px;height:15px;margin-bottom:7px"></div>
+        <div style="color:var(--suave);font-size:7pt">Contraseña</div>
+        <div style="border:1px solid var(--borde);border-radius:4px;height:15px;margin-bottom:9px"></div>
+        <div class="boton-ui" style="display:block;text-align:center">Entrar</div>
+      </div>
+    </div>
+  </div>
+
+  <ul>
+    <li>La sesión queda abierta en ese navegador; no hay que entrar cada vez.</li>
+    <li><strong>Salir</strong>, arriba a la derecha, cierra la sesión.</li>
+    <li><strong>Nuevo informe</strong>, al lado, descarta lo que esté en pantalla y vuelve al paso 1. Lo ya aprobado queda guardado.</li>
+  </ul>
+
+  <div class="caja stop">
+    <b class="tit">Si aparece «Falta configuración»</b>
+    <p style="margin:0">
+      La herramienta no sabe a qué base de datos conectarse. No es algo que se arregle
+      desde la pantalla: avise al equipo técnico.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">5</span><h2>Paso 1 — Cargar el balance</h2></div>
+  <p class="lead">
+    Elija el archivo, la empresa y el periodo. La herramienta lee el archivo en su propio
+    computador y le muestra qué entendió, antes de guardar nada.
+  </p>
+
+  <div class="pantalla">
+    <div class="top"><i></i><i></i><i></i><span>Paso 1 · Cargar el balance de comprobación</span></div>
+    <div class="cuerpo">
+      <div class="pasos-ui"><div class="on">1 Cargar balance</div><div>2 Clasificar cuentas</div><div>3 Estados y aprobación</div></div>
+      <div class="tarjeta">
+        <div style="font-weight:650;margin-bottom:6px">1. Cargar el balance de comprobación</div>
+        <span class="marca">1</span><span class="campo-ui">Balance-EmpresaX.xlsx</span>
+        <span class="marca">2</span><span class="campo-ui">Empresa ▾</span>
+        <span class="marca">3</span><span class="campo-ui">2025</span>
+      </div>
+      <div class="tarjeta">
+        <div style="font-weight:650;margin-bottom:6px"><span class="marca">4</span>Lo que se detectó</div>
+        <div class="metricas">
+          <div><b>13</b><span>cuentas al nivel más profundo</span></div>
+          <div><b>9</b><span>totales intermedios descartados</span></div>
+          <div><b style="font-size:9pt">BC Comprobación</b><span>hoja de origen</span></div>
+          <div><b>7</b><span>fila de encabezados</span></div>
+        </div>
+        <div style="font-weight:650;margin-bottom:4px"><span class="marca">5</span>Columnas</div>
+        <div style="margin-bottom:8px">
+          <span class="campo-ui">grupo ▾</span><span class="campo-ui">cuenta ▾</span><span class="campo-ui">subcuenta ▾</span>
+          <span class="campo-ui">auxiliar ▾</span><span class="campo-ui">subauxiliar ▾</span>
+          <span class="campo-ui">saldo: Nuevo saldo ▾</span><span class="campo-ui">anterior: Saldo inicial ▾</span>
+        </div>
+        <div style="font-weight:650;margin-bottom:4px"><span class="marca">6</span>Primeras cuentas leídas</div>
+        <table class="mini">
+          <tr><th>Código</th><th>Cuenta</th><th>Nivel</th><th class="num">Saldo</th><th class="num">Anterior</th></tr>
+          <tr><td>11050501</td><td>CAJA MENOR</td><td>subauxiliar</td><td class="num">400.000</td><td class="num">360.000</td></tr>
+          <tr><td>11100501</td><td>BBVA CTA 5996</td><td>subauxiliar</td><td class="num">59.000.000</td><td class="num">53.100.000</td></tr>
+          <tr><td>130505</td><td>CLIENTES NACIONALES</td><td>subcuenta</td><td class="num">80.000.000</td><td class="num">72.000.000</td></tr>
+        </table>
+        <div style="margin-top:8px"><span class="marca">7</span><span class="boton-ui">Continuar a la clasificación</span></div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="llamadas">
+    <li><span class="marca">1</span><div><strong>Archivo Excel.</strong> Se lee al instante. Si algo está mal, lo dice aquí mismo y no guarda nada.</div></li>
+    <li><span class="marca">2</span><div><strong>Empresa.</strong> Elíjala de la lista. Si es nueva, deje «— nueva —» y escriba el nombre en el campo que aparece. <em>Importante:</em> elegir bien la empresa es lo que hace que la herramienta recuerde las correcciones del periodo anterior.</div></li>
+    <li><span class="marca">3</span><div><strong>Periodo.</strong> El año del informe. Si el archivo trae columna de saldo anterior, el comparativo se toma como el año inmediatamente anterior.</div></li>
+    <li><span class="marca">4</span><div><strong>Lo que se detectó.</strong> Los cuatro números que confirman que leyó bien. Véalos en detalle abajo.</div></li>
+    <li><span class="marca">5</span><div><strong>Columnas.</strong> Normalmente no hay que tocarlas. Están por si el archivo de alguna empresa viene distinto.</div></li>
+    <li><span class="marca">6</span><div><strong>Primeras cuentas leídas.</strong> Una muestra. Mire que los nombres y los saldos se vean como en su archivo.</div></li>
+    <li><span class="marca">7</span><div><strong>Continuar.</strong> Recién aquí se guarda el informe y se pasa al paso 2.</div></li>
+  </ul>
+
+  <h3>Los cuatro números de «Lo que se detectó»</h3>
+  <table>
+    <thead><tr><th style="width:34%">Indicador</th><th>Qué significa y qué mirar</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Cuentas al nivel más profundo</strong></td>
+          <td>Las que van a alimentar las notas. Son las cuentas a nivel subauxiliar y, cuando una no tiene subauxiliar, al último nivel que sí tiene. Debería parecerse al número de líneas de detalle que usted traslada a mano.</td></tr>
+      <tr><td><strong>Totales intermedios descartados</strong></td>
+          <td>Las filas de grupo, cuenta o subcuenta que en el balance repiten la suma de sus hijas. Se descartan a propósito: si se sumaran, cada peso contaría dos veces. Es normal que sean muchas.</td></tr>
+      <tr><td><strong>Hoja de origen</strong></td>
+          <td>De cuál hoja del libro se está leyendo. Debe ser la del balance de comprobación.</td></tr>
+      <tr><td><strong>Fila de encabezados</strong></td>
+          <td>La fila donde están los títulos de las columnas — en los archivos de Siigo suele ser la 7. Es la fila real del Excel, la que usted ve al abrir el archivo.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Cuándo sí tocar «Columnas»</h3>
+  <p>Solo si algo de lo anterior salió mal. Cada vez que cambie una, todo se vuelve a leer al instante.</p>
+  <table>
+    <thead><tr><th style="width:38%">Si ve esto…</th><th>Corrija</th></tr></thead>
+    <tbody>
+      <tr><td>Los saldos no son los que espera</td><td><strong>saldo del periodo</strong>: elija la columna del saldo de cierre.</td></tr>
+      <tr><td>Sale el aviso «no se detectó periodo anterior» pero su archivo sí lo trae</td><td><strong>periodo anterior</strong>: señale esa columna.</td></tr>
+      <tr><td>En «Cuenta» aparecen códigos en vez de nombres</td><td><strong>nombre</strong>: señale la columna de descripción.</td></tr>
+      <tr><td>Se leyeron muy pocas cuentas</td><td>Los <strong>niveles</strong>: revise que cada uno apunte a su columna.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja ojo">
+    <b class="tit">Avisos que puede ver aquí</b>
+    <p style="margin:0 0 5px"><strong>«No se detectó columna de periodo anterior»</strong> — el informe saldrá con una sola columna. Si su archivo sí lo trae, señálelo en Columnas.</p>
+    <p style="margin:0"><strong>«No se encontró una columna subauxiliar»</strong> — se tomó el nivel más profundo que haya. Revise en la muestra que el detalle esté al nivel que usted acostumbra.</p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">6</span><h2>Paso 2 — Clasificar las cuentas</h2></div>
+  <p class="lead">
+    Aquí se decide a qué rubro del formato y a qué nota va cada cuenta. La herramienta
+    propone; usted confirma o corrige. <strong>Esta es la pantalla donde está su trabajo.</strong>
+  </p>
+
+  <h3>De dónde sale cada propuesta</h3>
+  <p>La herramienta resuelve en este orden, y solo baja al siguiente cuando el anterior no alcanza:</p>
+  <table>
+    <thead><tr><th style="width:16%">Etiqueta</th><th style="width:34%">Significa</th><th>Qué tan confiable es</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill memoria">memoria</span></td>
+          <td>Usted ya decidió esta cuenta antes, en esta misma empresa.</td>
+          <td>Total. Viene de usted. Llega confirmada.</td></tr>
+      <tr><td><span class="pill regla">regla</span></td>
+          <td>El código PUC de la cuenta cae bajo un prefijo conocido — por ejemplo, todo lo que empieza por 11 es efectivo.</td>
+          <td>Alta. Aun así queda «sin confirmar» hasta que usted la acepte.</td></tr>
+      <tr><td><span class="pill ia">ia 87%</span></td>
+          <td>Ninguna regla la cubría, así que se le preguntó al modelo. El porcentaje es qué tan seguro dice estar.</td>
+          <td>Reviselas. Por debajo del 80% quedan marcadas en amarillo.</td></tr>
+      <tr><td><span class="pill manual">manual</span></td>
+          <td>Usted la cambió.</td>
+          <td>Total, y se guarda para la próxima vez.</td></tr>
+      <tr><td><span class="pill pend">sin confirmar</span></td>
+          <td>Hay una propuesta, pero usted todavía no la ha aceptado.</td>
+          <td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pantalla">
+    <div class="top"><i></i><i></i><i></i><span>Paso 2 · Clasificación de cuentas</span></div>
+    <div class="cuerpo">
+      <div class="tarjeta">
+        <div style="font-weight:650;margin-bottom:6px">2. Clasificación de cuentas</div>
+        <div class="metricas">
+          <div><b>13</b><span>cuentas</span></div>
+          <div><b style="color:var(--error)">2</b><span>sin clasificar</span></div>
+          <div><b style="color:var(--alerta)">3</b><span>para revisar</span></div>
+          <div><b>8</b><span>confirmadas</span></div>
+        </div>
+        <div style="margin-bottom:4px">
+          <span class="marca">1</span>
+          <span class="campo-ui" style="border-color:var(--acento);color:var(--acento);font-weight:700">Para revisar (3)</span>
+          <span class="campo-ui">Sin clasificar (2)</span>
+          <span class="campo-ui">Propuestas del modelo</span>
+          <span class="campo-ui">Todas (13)</span>
+          <span class="marca">4</span><span class="boton-ui gris">Confirmar todas las propuestas</span>
+          <span class="marca">5</span><span class="boton-ui">Ver estados financieros</span>
+        </div>
+      </div>
+      <div class="tarjeta">
+        <table class="mini">
+          <tr><th>Código</th><th>Cuenta</th><th class="num">Saldo</th><th>Rubro del formato</th><th>Origen</th><th>Razón</th><th></th></tr>
+          <tr style="background:var(--alerta-claro)">
+            <td>13959505</td><td>OTROS DEUDORES VARIOS</td><td class="num">4.200.000</td>
+            <td><span class="marca">2</span><span class="campo-ui">3. Deudores comerciales ▾</span></td>
+            <td><span class="pill ia">ia 62%</span></td>
+            <td style="color:var(--suave)">Nombre genérico; código bajo 13.</td>
+            <td style="color:var(--suave)"><span class="marca">3</span>no presentar</td></tr>
+          <tr style="background:var(--alerta-claro)">
+            <td>19950501</td><td>DIVERSOS</td><td class="num">180.000</td>
+            <td><span class="campo-ui">— sin clasificar — ▾</span></td>
+            <td><span class="pill ia">ia 0%</span></td>
+            <td style="color:var(--suave)">Sin correspondencia clara en el catálogo.</td><td></td></tr>
+          <tr><td>11100501</td><td>BBVA CTA 5996</td><td class="num">59.000.000</td>
+            <td><span class="campo-ui">1. Efectivo y equivalentes ▾</span></td>
+            <td><span class="pill regla">regla</span> <span class="pill pend">sin confirmar</span></td>
+            <td style="color:var(--suave)">Código 11100501 bajo el prefijo 11.</td><td></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ul class="llamadas">
+    <li><span class="marca">1</span><div><strong>Filtros.</strong> Abre en «Para revisar»: lo que no tiene rubro y lo que el modelo propuso con poca seguridad. Empiece por ahí. «Todas» muestra el listado completo si quiere repasarlo.</div></li>
+    <li><span class="marca">2</span><div><strong>Rubro del formato.</strong> Despliegue y elija. El cambio se guarda solo, y a partir de ese momento esa cuenta queda resuelta para esta empresa.</div></li>
+    <li><span class="marca">3</span><div><strong>No presentar.</strong> Para una cuenta que no debe aparecer en el informe. No se borra ni se pierde: sigue contando en la validación de integridad, simplemente no se muestra. Se revierte con «incluir».</div></li>
+    <li><span class="marca">4</span><div><strong>Confirmar todas las propuestas.</strong> Acepta de una vez lo que quedó pendiente. Úselo cuando ya revisó lo dudoso.</div></li>
+    <li><span class="marca">5</span><div><strong>Ver estados financieros.</strong> Pasa al paso 3. Puede volver cuantas veces quiera.</div></li>
+  </ul>
+
+  <h3>Las filas en amarillo</h3>
+  <p>
+    Son las que piden su atención: sin clasificar, o propuestas del modelo con menos del 80%
+    de seguridad. El resto no está en amarillo porque viene de una regla o de una decisión
+    suya anterior.
+  </p>
+
+  <div class="caja nota">
+    <b class="tit">La casilla «Usar el modelo»</b>
+    <p style="margin:0">
+      Aparece antes de clasificar por primera vez, y viene marcada. Si la desmarca, se usan
+      solo la memoria y las reglas por código: es más rápido y no sale nada de la oficina,
+      pero todo lo que las reglas no cubran le quedará a usted para clasificar a mano.
+    </p>
+  </div>
+
+  <div class="caja ojo">
+    <b class="tit">Una cuenta sin clasificar no se pierde: detiene el informe</b>
+    <p style="margin:0">
+      Si queda alguna sin rubro, la validación V-01 bloquea la aprobación. Es deliberado:
+      antes que ubicar mal una cuenta, la herramienta prefiere preguntarle.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">7</span><h2>Paso 3 — Estados, validaciones y aprobación</h2></div>
+  <p class="lead">
+    Las tres hojas ya están armadas. Arriba, el tablero de validaciones le dice si algo no
+    cuadra; abajo, puede revisar cada hoja antes de aprobar.
+  </p>
+
+  <div class="pantalla">
+    <div class="top"><i></i><i></i><i></i><span>Paso 3 · Revisión y aprobación</span></div>
+    <div class="cuerpo">
+      <div class="tarjeta">
+        <div style="font-weight:650;margin-bottom:6px">3. Revisión y aprobación</div>
+        <table class="mini">
+          <tr><td style="width:46px"><span class="pill" style="background:var(--ok-claro);border-color:#bfe3ce;color:var(--ok)">ok</span></td>
+              <td style="width:34px;color:var(--suave)">V-01</td><td>Todas las cuentas con saldo fueron clasificadas</td>
+              <td style="color:var(--suave)">13 cuentas clasificadas.</td></tr>
+          <tr><td><span class="pill" style="background:var(--ok-claro);border-color:#bfe3ce;color:var(--ok)">ok</span></td>
+              <td style="color:var(--suave)">V-02</td><td>Integridad de importes contra el balance de comprobación</td>
+              <td style="color:var(--suave)">Cada saldo está representado una vez.</td></tr>
+          <tr><td><span class="pill" style="background:var(--alerta-claro);border-color:#eedba6;color:var(--alerta)">revisar</span></td>
+              <td style="color:var(--suave)">V-06</td><td>Activo = Pasivo + Patrimonio + Resultado</td>
+              <td style="color:var(--suave)">Diferencia de 180.000.</td></tr>
+        </table>
+        <div style="margin-top:8px">
+          <span class="marca">1</span><span class="boton-ui gris">Volver a la clasificación</span>
+          <span class="marca">2</span><span class="boton-ui">Aprobar informe</span>
+          <span class="marca">3</span><span class="boton-ui gris">Descargar Excel</span>
+          <span class="boton-ui gris">Guardar como PDF</span>
+        </div>
+      </div>
+      <div class="tarjeta">
+        <div style="margin-bottom:6px">
+          <span class="marca">4</span>
+          <span class="campo-ui" style="border-color:var(--acento);color:var(--acento);font-weight:700">Balance 2025</span>
+          <span class="campo-ui">Estado de resultados</span><span class="campo-ui">Notas (9)</span>
+        </div>
+        <table class="mini">
+          <tr><th>Concepto</th><th class="num">Nota</th><th class="num">2025</th><th class="num">2024</th></tr>
+          <tr style="background:#fafbfc"><td><b>Activo corriente</b></td><td></td><td></td><td></td></tr>
+          <tr><td style="padding-left:14px">Efectivo y equivalentes al efectivo</td><td class="num">1</td><td class="num">80.000.000</td><td class="num">72.000.000</td></tr>
+          <tr><td style="padding-left:14px">Deudores comerciales</td><td class="num">3</td><td class="num">80.000.000</td><td class="num">72.000.000</td></tr>
+          <tr style="background:#fafbfc"><td><b>Total activo corriente</b></td><td></td><td class="num">160.000.000</td><td class="num">144.000.000</td></tr>
+          <tr style="background:#f4f6f8;border-top:1.5px solid var(--tinta)"><td><b>TOTAL ACTIVO</b></td><td></td><td class="num"><b>200.000.000</b></td><td class="num"><b>180.000.000</b></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ul class="llamadas">
+    <li><span class="marca">1</span><div><strong>Volver a la clasificación.</strong> Corrija y regrese: todo se recalcula y las validaciones se vuelven a correr.</div></li>
+    <li><span class="marca">2</span><div><strong>Aprobar informe.</strong> Solo se habilita si ninguna validación bloqueante falla. Queda registrado quién aprobó y cuándo.</div></li>
+    <li><span class="marca">3</span><div><strong>Descargar Excel / Guardar como PDF.</strong> Se habilitan después de aprobar. El PDF sale por la impresión del navegador — elija «Guardar como PDF» como destino.</div></li>
+    <li><span class="marca">4</span><div><strong>Las tres hojas.</strong> Balance, Estado de resultados y Notas. Reviselas antes de aprobar: lo que ve aquí es lo que va a salir.</div></li>
+  </ul>
+
+  <h3>El aviso sobre los saldos acreedores</h3>
+  <p>
+    A veces aparece: <em>«Los saldos acreedores vienen en negativo en este archivo; se
+    invierte el signo para presentarlos»</em>. Quiere decir que en su archivo pasivos,
+    patrimonio e ingresos están en negativo, y la herramienta los dio vuelta para mostrarlos
+    en positivo, como se presentan. <strong>Si ve ese aviso, mire con cuidado los totales del
+    pasivo y del patrimonio antes de aprobar.</strong>
+  </p>
+
+  <h3>Qué queda guardado al aprobar</h3>
+  <ul>
+    <li>El informe, con su fecha, su usuario y el resultado de cada validación.</li>
+    <li>Las cuentas y la clasificación final de cada una.</li>
+    <li>Las correcciones que hizo, como memoria de esa empresa para el próximo periodo.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">8</span><h2>Las validaciones, una por una</h2></div>
+  <p class="lead">
+    Se recalculan solas con cada cambio. Las <strong>bloqueantes</strong> impiden aprobar;
+    las de <strong>aviso</strong> le señalan algo que vale la pena mirar, pero la decisión
+    es suya.
+  </p>
+
+  <table>
+    <thead><tr><th style="width:9%">Código</th><th style="width:26%">Qué revisa</th><th style="width:11%">Tipo</th><th>Si falla, qué hacer</th></tr></thead>
+    <tbody>
+      <tr><td><strong>V-01</strong></td><td>Que toda cuenta con saldo tenga un rubro asignado</td>
+          <td><span class="pill" style="background:var(--error-claro);border-color:#f3c6c3;color:var(--error)">bloquea</span></td>
+          <td>Vuelva al paso 2, filtro «Sin clasificar», y resuelva cada una. Si alguna no debe presentarse, márquela «no presentar».</td></tr>
+      <tr><td><strong>V-02</strong></td><td>Que la suma de lo clasificado sea exactamente la del archivo</td>
+          <td><span class="pill" style="background:var(--error-claro);border-color:#f3c6c3;color:var(--error)">bloquea</span></td>
+          <td>Es la garantía de que no se perdió ni se duplicó nada. Si falla, hay un problema de la herramienta: avise al equipo técnico con el archivo.</td></tr>
+      <tr><td><strong>V-03</strong></td><td>Que el total de cada nota sea la suma de su propio detalle</td>
+          <td><span class="pill" style="background:var(--error-claro);border-color:#f3c6c3;color:var(--error)">bloquea</span></td>
+          <td>Igual que la anterior: no debería fallar nunca. Avise.</td></tr>
+      <tr><td><strong>V-04</strong></td><td>Que cada línea de los estados traiga el total de la nota que referencia</td>
+          <td><span class="pill" style="background:var(--error-claro);border-color:#f3c6c3;color:var(--error)">bloquea</span></td>
+          <td>Lo mismo. Avise.</td></tr>
+      <tr><td><strong>V-05</strong></td><td>Que toda nota generada esté referenciada en algún estado</td>
+          <td><span class="pill" style="background:var(--alerta-claro);border-color:#eedba6;color:var(--alerta)">aviso</span></td>
+          <td>Hay una nota que no aparece en ningún estado. Suele indicar un rubro mal configurado en el catálogo: coméntelo al equipo.</td></tr>
+      <tr><td><strong>V-06</strong></td><td>Activo = Pasivo + Patrimonio + Resultado del periodo</td>
+          <td><span class="pill" style="background:var(--alerta-claro);border-color:#eedba6;color:var(--alerta)">aviso</span></td>
+          <td><strong>La más útil para usted.</strong> Si no cuadra, casi siempre es una cuenta clasificada en el grupo equivocado — patrimonio en pasivo, o un ingreso en activo. La diferencia que reporta suele ser la pista.</td></tr>
+      <tr><td><strong>V-07</strong></td><td>Que haya periodo comparativo</td>
+          <td><span class="pill" style="background:var(--alerta-claro);border-color:#eedba6;color:var(--alerta)">aviso</span></td>
+          <td>El informe saldrá con una sola columna. Si el archivo sí trae el año anterior, vuelva al paso 1 y señale esa columna.</td></tr>
+      <tr><td><strong>V-08</strong></td><td>Qué rubros se omitieron por no tener información</td>
+          <td><span class="pill" style="background:var(--acento-claro);border-color:#c5ddec;color:var(--acento)">informa</span></td>
+          <td>Nunca falla; solo le lista lo que no se presenta. Léalo: si ahí aparece algo que la empresa sí tiene, es que una cuenta quedó mal clasificada.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja nota">
+    <b class="tit">Por qué V-02, V-03 y V-04 bloquean aunque «nunca fallen»</b>
+    <p style="margin:0">
+      Son el seguro de la automatización: comparan el resultado contra el archivo de origen
+      en cada paso de la cadena. Mientras estén en verde, usted tiene la certeza de que cada
+      peso del balance de comprobación llegó al informe una sola vez y sin cambiar.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">9</span><h2>Problemas frecuentes</h2></div>
+
+  <table>
+    <thead><tr><th style="width:30%">Lo que ve</th><th style="width:33%">Qué pasó</th><th>Qué hacer</th></tr></thead>
+    <tbody>
+      <tr><td><strong>«El archivo trae fórmulas sin resolver»</strong>, con hoja y fila</td>
+          <td>El libro está enlazado a otro archivo que quedó en su computador. Al abrirlo en otro lado, esas celdas no encuentran el dato.</td>
+          <td>Abra el original, copie los valores dentro del mismo libro (pegado especial → valores) y guarde. Vuelva a cargarlo.</td></tr>
+      <tr><td><strong>«No se encontró el balance de comprobación»</strong></td>
+          <td>Ninguna hoja tiene una fila de encabezados con los niveles y una columna de saldo.</td>
+          <td>Verifique que exportó el balance de comprobación y no otro reporte. Si la hoja está pero el formato cambió, avise: puede que haya que ajustar la detección.</td></tr>
+      <tr><td><strong>«No se leyó ninguna cuenta con saldo»</strong></td>
+          <td>Encontró la hoja, pero las columnas que eligió no traen datos.</td>
+          <td>Revise «Columnas»: sobre todo cuál es la de saldo del periodo.</td></tr>
+      <tr><td>El número de cuentas es <strong>mucho mayor</strong> del que espera</td>
+          <td>Puede que se estén tomando totales intermedios como si fueran detalle.</td>
+          <td>Mire «totales intermedios descartados»: si está en cero o muy bajo, revise las columnas de niveles.</td></tr>
+      <tr><td>Muchas cuentas con <span class="pill ia">ia</span> y poca confianza</td>
+          <td>El plan de cuentas de esa empresa usa códigos que las reglas no cubren.</td>
+          <td>Corríjalas una vez: quedan aprendidas para esa empresa. Si se repite en varias empresas, vale la pena ampliar las reglas — coméntelo.</td></tr>
+      <tr><td>Un rubro <strong>no aparece</strong> en el estado</td>
+          <td>Ninguna cuenta quedó clasificada ahí. Es el comportamiento correcto cuando la empresa no tiene ese rubro.</td>
+          <td>Si la empresa sí lo tiene, busque esa cuenta en el paso 2, filtro «Todas», y reasígnela.</td></tr>
+      <tr><td>El botón <strong>Aprobar</strong> está apagado</td>
+          <td>Hay al menos una validación bloqueante en rojo.</td>
+          <td>Léala en el tablero y vuelva al paso 2.</td></tr>
+      <tr><td>Los botones de <strong>descarga</strong> están apagados</td>
+          <td>El informe todavía no está aprobado.</td>
+          <td>Apruebe primero. Es a propósito: no debe salir un documento sin su visto bueno.</td></tr>
+      <tr><td>Error al clasificar que menciona <strong>«ANTHROPIC_API_KEY»</strong></td>
+          <td>La parte de IA no está configurada todavía.</td>
+          <td>Avise al equipo técnico. Mientras tanto puede trabajar sin el modelo: desmarque «Usar el modelo» y clasifique con reglas y a mano.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">10</span><h2>Glosario</h2></div>
+  <table>
+    <tbody>
+      <tr><td style="width:30%"><strong>Balance de comprobación</strong></td>
+          <td>La hoja que usted exporta de Siigo con el saldo de cada cuenta. Es la única fuente de datos del informe.</td></tr>
+      <tr><td><strong>Nuevo saldo</strong></td>
+          <td>El saldo de cierre del periodo. Es el valor que se traslada a las notas.</td></tr>
+      <tr><td><strong>Nivel más profundo</strong></td>
+          <td>El subauxiliar cuando existe; si la cuenta no tiene subauxiliar, el último nivel que sí tenga. Es el detalle que va a las notas.</td></tr>
+      <tr><td><strong>Total intermedio</strong></td>
+          <td>Fila del balance que repite la suma de las cuentas que cuelgan de ella. Se descarta para no contar dos veces.</td></tr>
+      <tr><td><strong>Rubro</strong></td>
+          <td>Cada línea del formato institucional: «Efectivo y equivalentes», «Deudores comerciales», «Ingresos operacionales».</td></tr>
+      <tr><td><strong>Nota</strong></td>
+          <td>El detalle que sustenta un rubro. Cada rubro apunta a un número de nota, y el estado muestra el total de esa nota.</td></tr>
+      <tr><td><strong>Catálogo</strong></td>
+          <td>La lista de rubros y notas del formato institucional. Es lo que define cómo se ve el informe.</td></tr>
+      <tr><td><strong>Clasificar</strong></td>
+          <td>Decidir a qué rubro pertenece cada cuenta del balance.</td></tr>
+      <tr><td><strong>Memoria</strong></td>
+          <td>Las decisiones que usted ya tomó para una empresa. Se aplican solas en los periodos siguientes.</td></tr>
+      <tr><td><strong>Validación bloqueante</strong></td>
+          <td>Comprobación que impide aprobar mientras no cuadre.</td></tr>
+      <tr><td><strong>No presentar</strong></td>
+          <td>Marca para que una cuenta no salga en el informe, sin borrarla del control de integridad.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">11</span><h2>Lo que todavía falta definir</h2></div>
+  <p class="lead">
+    La herramienta funciona de extremo a extremo, pero hay decisiones que solo puede tomar
+    SusConsultores. Mientras no se tomen, el programa usa un criterio provisional —
+    anotado aquí para que nadie se lleve una sorpresa.
+  </p>
+
+  <table>
+    <thead><tr><th style="width:26%">Tema</th><th style="width:37%">Qué hace hoy</th><th>Qué falta decidir</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Catálogo de rubros y notas</strong></td>
+          <td>Usa un catálogo provisional de 19 notas armado sobre el PUC, con «Ingresos operacionales» en la nota 13.</td>
+          <td>El catálogo real de SusConsultores, con sus nombres, su orden y su numeración. Es lo que más cambia el resultado.</td></tr>
+      <tr><td><strong>Notas unificadas</strong></td>
+          <td>Cada rubro genera su nota solo si tiene cuentas.</td>
+          <td>Cómo quedan las notas generales para que sirvan a empresas distintas.</td></tr>
+      <tr><td><strong>Formato de presentación</strong></td>
+          <td>Un diseño propio, legible e imprimible.</td>
+          <td>El formato institucional exacto. Hace falta el archivo de referencia para replicarlo.</td></tr>
+      <tr><td><strong>Periodo comparativo</strong></td>
+          <td>Toma la columna de saldo anterior o inicial del mismo archivo, si existe.</td>
+          <td>De dónde debe salir el año anterior: del mismo archivo, de otra exportación, o del informe ya emitido.</td></tr>
+      <tr><td><strong>Signo de los saldos acreedores</strong></td>
+          <td>Lo deduce del archivo y avisa cuando invierte el signo.</td>
+          <td>Si la convención es siempre la misma en todas las empresas.</td></tr>
+      <tr><td><strong>Cuentas en cero</strong></td>
+          <td>Se muestran en el detalle de la nota.</td>
+          <td>Si deben ocultarse.</td></tr>
+      <tr><td><strong>Cuadre contra las hojas de Siigo</strong></td>
+          <td>No las usa: hoy ese cotejo sigue siendo visual, como siempre.</td>
+          <td>Si se conservan esas hojas para que la herramienta valide sola.</td></tr>
+      <tr><td><strong>Memoria de correcciones</strong></td>
+          <td>Activa: lo que usted corrige no se vuelve a preguntar en esa empresa.</td>
+          <td>Confirmar que es el comportamiento deseado.</td></tr>
+      <tr><td><strong>Información que sale de la oficina</strong></td>
+          <td>Al modelo viajan código y nombre de cuenta. Los saldos no salen nunca.</td>
+          <td>Si eso es aceptable para la información de los clientes de SusConsultores. La decisión es de la firma, no del equipo técnico.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja ok">
+    <b class="tit">Cómo reportar algo</b>
+    <p style="margin:0">
+      Cuando algo no salga como espera, lo más útil es indicar: <strong>qué empresa y qué
+      periodo</strong>, <strong>en qué paso ocurrió</strong>, <strong>el texto exacto del
+      mensaje</strong> y, si puede, el archivo que cargó. Con eso el problema se reproduce
+      en minutos.
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
