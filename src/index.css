@@ -298,3 +298,15 @@ details > summary { cursor: pointer; }
 @media print {
   .encabezado-app, .pasos, .barra-accion, .no-print { display: none !important; }
 }
+
+/* ── Configuración ──────────────────────────────────────── */
+.lista-modelos { display: flex; flex-direction: column; gap: 6px; }
+.opcion-modelo {
+  display: flex; gap: 10px; align-items: flex-start; padding: 9px 12px; cursor: pointer;
+  border: 1px solid var(--borde); border-radius: 8px; background: #fff;
+}
+.opcion-modelo:hover { border-color: var(--borde-fuerte); }
+.opcion-modelo.elegida { border-color: var(--acento); background: var(--acento-suave); }
+.opcion-modelo input[type=radio] { margin-top: 4px; }
+.opcion-modelo small { display: block; color: var(--suave); font-size: 12px; }
+.opcion-modelo code { font-size: 11px; }

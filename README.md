@@ -95,6 +95,26 @@ menciona otra empresa (una plantilla copiada de otro cliente), se avisa. Los
 firmantes se recuerdan por empresa (`sc_empresas`) y el encabezado queda con el
 informe (`sc_informes.encabezado`).
 
+## Configuración de la IA (llave y modelo)
+
+Desde **⚙ Configuración** un administrador registra la llave de Anthropic y elige
+el modelo (Sonnet 5.5, Opus 5.5, Haiku 5.5, Fable 5.1, Sonnet 5 u otro
+identificador), y puede **probar la conexión** antes de usarla.
+
+- La llave se guarda cifrada en **Supabase Vault** (`sc_anthropic_api_key`) con la
+  función `sc_guardar_clave_ia`. Nadie puede leerla de vuelta: la app solo ve si
+  está configurada y sus últimos 4 caracteres (`sc_configuracion.clave_final`).
+- Las Edge Functions la leen con la llave de servicio (`sc_config_ia_servidor`,
+  ejecutable solo por `service_role`, en `supabase/functions/_shared/configIA.ts`).
+  Si no hay llave en la app, usan el secreto `ANTHROPIC_API_KEY` como respaldo.
+- Solo los usuarios de `sc_administradores` pueden cambiarla (el proyecto de
+  Supabase es compartido con otras aplicaciones). La migración registra como
+  administradores a quienes ya crearon informes; para agregar otro:
+  `insert into sc_administradores (user_id) values ('<uuid del usuario>');`
+- Requiere la migración `20261008100000_sc_configuracion_ia.sql` y desplegar
+  `sc-identificar-hojas`, `sc-clasificar-cuentas` y `sc-probar-ia` (las tres
+  importan `../_shared/configIA.ts`).
+
 ## Decisiones que tomó el código y conviene revisar con el cliente
 
 | Tema | Qué hace hoy | Por qué hay que confirmarlo |

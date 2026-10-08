@@ -5,8 +5,7 @@
 // el análisis automático ya detectó; nunca saldos. Devuelve, por hoja, su tipo
 // y su período. La app acepta solo lo que puede verificar y el usuario revisa.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-const MODELO = "claude-sonnet-5";
+import { MENSAJE_SIN_CLAVE, obtenerConfigIA } from "../_shared/configIA.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -96,12 +95,8 @@ Deno.serve(async (req: Request) => {
     new Response(JSON.stringify(body), { status, headers: { ...cors, "content-type": "application/json" } });
 
   try {
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) {
-      return json({
-        error: "La clasificación con IA no está disponible: falta el secreto ANTHROPIC_API_KEY en Supabase > Edge Functions > Secrets.",
-      }, 500);
-    }
+    const { apiKey, modelo } = await obtenerConfigIA();
+    if (!apiKey) return json({ error: MENSAJE_SIN_CLAVE }, 500);
 
     const { hojas } = (await req.json()) as { hojas: Hoja[] };
     if (!Array.isArray(hojas) || hojas.length === 0) return json({ error: "Payload inválido." }, 400);
@@ -110,7 +105,7 @@ Deno.serve(async (req: Request) => {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
-        model: MODELO,
+        model: modelo,
         max_tokens: 4000,
         system: SISTEMA,
         tools: [HERRAMIENTA],
@@ -130,7 +125,7 @@ Deno.serve(async (req: Request) => {
     const nombres = new Set(hojas.map((h) => h.nombre));
     const r = bloque.input ?? {};
     r.hojas = (Array.isArray(r.hojas) ? r.hojas : []).filter((h: { nombre: string }) => nombres.has(h.nombre));
-    return json({ resultado: r, modelo: MODELO });
+    return json({ resultado: r, modelo });
   } catch (e) {
     return json({ error: String(e) }, 500);
   }

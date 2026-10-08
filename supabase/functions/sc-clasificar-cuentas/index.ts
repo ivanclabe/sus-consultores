@@ -8,8 +8,8 @@
 // Todo código de rubro devuelto se valida contra el catálogo antes de salir
 // de aquí; lo que no valide se devuelve como sin_clasificar.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { MENSAJE_SIN_CLAVE, obtenerConfigIA } from "../_shared/configIA.ts";
 
-const MODELO = "claude-sonnet-5";
 const LOTE = 50;
 
 type Cuenta = { id: string; codigo: string; nombre: string };
@@ -86,6 +86,7 @@ function sistema(rubros: Rubro[]): string {
 
 async function clasificarLote(
   apiKey: string,
+  modelo: string,
   cuentas: Cuenta[],
   rubros: Rubro[],
 ): Promise<Resultado[]> {
@@ -101,7 +102,7 @@ async function clasificarLote(
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: MODELO,
+      model: modelo,
       max_tokens: 8000,
       system: sistema(rubros),
       tools: [HERRAMIENTA],
@@ -134,14 +135,10 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    const { apiKey, modelo } = await obtenerConfigIA();
     if (!apiKey) {
       return new Response(
-        JSON.stringify({
-          error:
-            "Falta el secreto ANTHROPIC_API_KEY en la Edge Function. " +
-            "Configúralo en Supabase > Edge Functions > Secrets.",
-        }),
+        JSON.stringify({ error: MENSAJE_SIN_CLAVE }),
         { status: 500, headers: { ...cors, "content-type": "application/json" } },
       );
     }
@@ -162,7 +159,7 @@ Deno.serve(async (req: Request) => {
 
     for (let i = 0; i < cuentas.length; i += LOTE) {
       const lote = cuentas.slice(i, i + LOTE);
-      const salida = await clasificarLote(apiKey, lote, rubros);
+      const salida = await clasificarLote(apiKey, modelo, lote, rubros);
       for (const r of salida) porId.set(r.id, r);
     }
 
@@ -187,7 +184,7 @@ Deno.serve(async (req: Request) => {
       };
     });
 
-    return new Response(JSON.stringify({ resultados, modelo: MODELO }), {
+    return new Response(JSON.stringify({ resultados, modelo }), {
       headers: { ...cors, "content-type": "application/json" },
     });
   } catch (e) {

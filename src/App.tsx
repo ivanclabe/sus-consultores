@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Auth from './components/Auth'
+import Configuracion from './components/Configuracion'
 import PasoCargar from './components/PasoCargar'
 import PasoClasificar from './components/PasoClasificar'
 import PasoEstados from './components/PasoEstados'
@@ -29,6 +30,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   // Cambia con «Nuevo informe» para empezar el paso 1 desde cero.
   const [intento, setIntento] = useState(0)
+  const [enConfiguracion, setEnConfiguracion] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -98,13 +100,23 @@ export default function App() {
           </div>
           <div className="fila" style={{ alignItems: 'center' }}>
             <span className="usuario">{sesion.user.email}</span>
-            {informe && <button onClick={reiniciar}>Nuevo informe</button>}
+            {informe && !enConfiguracion && <button onClick={reiniciar}>Nuevo informe</button>}
+            <button onClick={() => setEnConfiguracion((v) => !v)} aria-pressed={enConfiguracion}>
+              {enConfiguracion ? 'Volver al informe' : '⚙ Configuración'}
+            </button>
             <button onClick={() => supabase.auth.signOut()}>Salir</button>
           </div>
         </div>
       </header>
 
-      <main className="app">
+      {enConfiguracion && (
+        <main className="app">
+          <Configuracion usuarioId={sesion.user.id} onCerrar={() => setEnConfiguracion(false)} />
+        </main>
+      )}
+
+      {/* El flujo sigue montado mientras se ve la configuración: no se pierde el informe en curso. */}
+      <main className="app" hidden={enConfiguracion}>
         {error && <div className="aviso error">{error}</div>}
         {rubros.length === 0 && !error && (
           <div className="aviso alerta">
