@@ -46,6 +46,14 @@ npx supabase functions deploy sc-identificar-hojas sc-clasificar-cuentas sc-prob
 El `REF_DEL_PROYECTO` es el código que aparece en la URL del proyecto
 (`https://<ref>.supabase.co`). Las tres funciones usan `functions/_shared/configIA.ts`.
 
+*Sin terminal (desde el panel):* la carpeta `funciones/` tiene las tres funciones
+en un solo archivo cada una. Para cada archivo: *Edge Functions* → *Deploy a new
+function* → *Via Editor* → nombre exacto de la función (`sc-identificar-hojas`,
+`sc-clasificar-cuentas`, `sc-probar-ia`) → borra el código de ejemplo, pega el
+contenido del archivo → *Deploy function*. Deja activa la verificación de JWT.
+Para actualizar una función ya creada: ábrela → pestaña *Code* → pega la versión
+nueva → *Deploy updates*.
+
 **7. Conectar la app.** En *Project Settings* → *API Keys* copia la *Project URL*
 y la *Publishable key*, y crea `.env.local` en la raíz del repositorio (y en el
 servidor donde se publique):

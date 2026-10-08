@@ -57,4 +57,23 @@ TXT
   echo "commit;"
 } > 00_instalacion_completa.sql
 
-echo "Listo: $(ls -1 *.sql | wc -l | tr -d ' ') archivos SQL en $(pwd)"
+# Funciones en un solo archivo, para pegarlas en el editor del panel de Supabase
+# (Edge Functions > Deploy a new function > Via Editor). Llevan dentro la
+# configuración compartida de functions/_shared/configIA.ts.
+mkdir -p funciones
+for f in sc-identificar-hojas sc-clasificar-cuentas sc-probar-ia; do
+  origen=../functions/$f/index.ts
+  {
+    echo "// $f — versión de un solo archivo para el editor del panel de Supabase."
+    echo "// Generada por supabase/instalacion-cliente/generar.sh: no editar a mano."
+    grep '^import "jsr:' "$origen"
+    echo
+    echo "// ---- configuración compartida (functions/_shared/configIA.ts) ----"
+    grep -v '^import ' ../functions/_shared/configIA.ts
+    echo "// ---- fin de la configuración compartida ----"
+    echo
+    grep -v '^import ' "$origen"
+  } > "funciones/$f.ts"
+done
+
+echo "Listo: $(ls -1 *.sql | wc -l | tr -d ' ') archivos SQL y $(ls -1 funciones/*.ts | wc -l | tr -d ' ') funciones en $(pwd)"
