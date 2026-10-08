@@ -17,10 +17,11 @@ export default function Auth() {
   }
 
   return (
-    <div className="app">
+    <div className="login-fondo">
       <div className="login panel">
+        <div className="logo-marca">SC</div>
         <h1>Estados Financieros</h1>
-        <p className="sutil-texto">SusConsultores — acceso del equipo contable.</p>
+        <p className="sutil-texto">SusConsultores · acceso del equipo contable.</p>
         {error && <div className="aviso error">{error}</div>}
         <form onSubmit={entrar}>
           <div className="campo" style={{ marginBottom: 10 }}>
@@ -31,7 +32,7 @@ export default function Auth() {
             <label htmlFor="clave">Contraseña</label>
             <input id="clave" type="password" value={clave} onChange={(e) => setClave(e.target.value)} required />
           </div>
-          <button className="primario" type="submit" disabled={cargando} style={{ width: '100%' }}>
+          <button className="primario grande" type="submit" disabled={cargando} style={{ width: '100%', justifyContent: 'center' }}>
             {cargando ? 'Entrando…' : 'Entrar'}
           </button>
         </form>

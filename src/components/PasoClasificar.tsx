@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { clasificar, normalizarNombre, requiereRevision, type MapeoMemoria } from '../lib/clasificar'
 import { supabase } from '../lib/supabase'
 import type {
@@ -37,8 +37,19 @@ export default function PasoClasificar({
   const [error, setError] = useState<string | null>(null)
   const [nota, setNota] = useState<string | null>(null)
   const [filtro, setFiltro] = useState<Filtro>('revisar')
+  const [confirmando, setConfirmando] = useState(false)
 
   const hojas = useMemo(() => cuentas.filter((c) => c.es_hoja), [cuentas])
+
+  // Al entrar al paso se clasifica de inmediato: no hace falta otro clic.
+  const iniciado = useRef(false)
+  useEffect(() => {
+    if (clasificadas.length === 0 && !iniciado.current) {
+      iniciado.current = true
+      ejecutar()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function ejecutar() {
     setCorriendo(true)
@@ -138,18 +149,30 @@ export default function PasoClasificar({
     )
   }
 
-  async function confirmarTodas() {
+  async function confirmarTodas(): Promise<boolean> {
     const pendientes = clasificadas.filter(
       (c) => c.clasificacion.estado === 'propuesta' && c.clasificacion.rubro_codigo,
     )
-    if (pendientes.length === 0) return
+    if (pendientes.length === 0) return true
     const { error } = await supabase
       .from('sc_clasificaciones')
       .update({ estado: 'confirmada', updated_at: new Date().toISOString() })
       .in('id', pendientes.map((c) => c.clasificacion.id))
     if (error) {
       setError(error.message)
-      return
+      return false
+    }
+    // Lo confirmado en bloque también alimenta la memoria de la empresa.
+    if (informe.empresa_id) {
+      await supabase.from('sc_mapeos_confirmados').upsert(
+        pendientes.map((c) => ({
+          empresa_id: informe.empresa_id,
+          codigo: c.codigo,
+          nombre_norm: normalizarNombre(c.nombre),
+          rubro_codigo: c.clasificacion.rubro_codigo,
+        })),
+        { onConflict: 'empresa_id,codigo,nombre_norm' },
+      )
     }
     onClasificadas(
       clasificadas.map((c) =>
@@ -158,6 +181,14 @@ export default function PasoClasificar({
           : c,
       ),
     )
+    return true
+  }
+
+  async function confirmarYContinuar() {
+    setConfirmando(true)
+    const ok = await confirmarTodas()
+    setConfirmando(false)
+    if (ok) onContinuar()
   }
 
   const visibles = clasificadas.filter((c) => {
@@ -174,30 +205,42 @@ export default function PasoClasificar({
   return (
     <>
       <div className="panel">
-        <h2>2. Clasificación de cuentas</h2>
-        <p className="sutil-texto">
-          Primero mandan las cuentas que ya confirmaste antes para esta empresa, después las
-          reglas por código PUC. Solo lo que sobra llega al modelo, y el modelo nunca ve saldos:
-          propone una etiqueta, tú decides.
-        </p>
+        <div className="panel-titulo">
+          <div>
+            <h2>Clasificación de cuentas</h2>
+            <p className="sutil-texto">
+              Primero las cuentas que ya confirmaste para esta empresa, luego las reglas por código PUC y, al
+              final, el modelo para lo que sobre. El modelo nunca ve saldos: propone un rubro y tú decides.
+            </p>
+          </div>
+          {clasificadas.length > 0 && (
+            <button className="sutil" onClick={ejecutar} disabled={corriendo} title="Vuelve a correr la clasificación">
+              ↻ Reclasificar
+            </button>
+          )}
+        </div>
         {error && <div className="aviso error">{error}</div>}
         {nota && <div className="aviso ok">{nota}</div>}
 
         {clasificadas.length === 0 ? (
-          <div className="fila">
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <input
-                type="checkbox"
-                checked={usarIA}
-                onChange={(e) => setUsarIA(e.target.checked)}
-                style={{ width: 'auto' }}
-              />
-              Usar el modelo para lo que las reglas no cubran
-            </label>
-            <button className="primario" onClick={ejecutar} disabled={corriendo}>
-              {corriendo ? 'Clasificando…' : `Clasificar ${hojas.length} cuentas`}
-            </button>
-          </div>
+          corriendo ? (
+            <div>
+              <p style={{ marginBottom: 8 }}>
+                Clasificando {hojas.length} cuentas{usarIA ? ' (memoria, reglas e IA)' : ''}…
+              </p>
+              <div className="progreso"><i /></div>
+            </div>
+          ) : (
+            <div className="fila">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input type="checkbox" checked={usarIA} onChange={(e) => setUsarIA(e.target.checked)} />
+                Usar el modelo para lo que las reglas no cubran
+              </label>
+              <button className="primario" onClick={ejecutar} disabled={corriendo}>
+                Clasificar {hojas.length} cuentas
+              </button>
+            </div>
+          )
         ) : (
           <>
             <div className="metricas">
@@ -206,9 +249,7 @@ export default function PasoClasificar({
                 <span>cuentas</span>
               </div>
               <div className="metrica">
-                <b style={{ color: sinClasificar ? 'var(--error)' : 'var(--ok)' }}>
-                  {sinClasificar}
-                </b>
+                <b style={{ color: sinClasificar ? 'var(--error)' : 'var(--ok)' }}>{sinClasificar}</b>
                 <span>sin clasificar</span>
               </div>
               <div className="metrica">
@@ -221,27 +262,17 @@ export default function PasoClasificar({
               </div>
             </div>
 
-            <div className="fila no-print">
-              <div className="tabs" style={{ marginBottom: 0, flex: 1 }}>
-                {([
-                  ['revisar', `Para revisar (${porRevisar})`],
-                  ['sin', `Sin clasificar (${sinClasificar})`],
-                  ['ia', 'Propuestas del modelo'],
-                  ['todas', `Todas (${clasificadas.length})`],
-                ] as [Filtro, string][]).map(([f, etiqueta]) => (
-                  <button
-                    key={f}
-                    className={filtro === f ? 'activo' : ''}
-                    onClick={() => setFiltro(f)}
-                  >
-                    {etiqueta}
-                  </button>
-                ))}
-              </div>
-              <button onClick={confirmarTodas}>Confirmar todas las propuestas</button>
-              <button className="primario" onClick={onContinuar}>
-                Ver estados financieros
-              </button>
+            <div className="tabs" style={{ marginBottom: 0 }}>
+              {([
+                ['revisar', `Para revisar (${porRevisar})`],
+                ['sin', `Sin clasificar (${sinClasificar})`],
+                ['ia', 'Propuestas del modelo'],
+                ['todas', `Todas (${clasificadas.length})`],
+              ] as [Filtro, string][]).map(([f, etiqueta]) => (
+                <button key={f} className={filtro === f ? 'activo' : ''} onClick={() => setFiltro(f)}>
+                  {etiqueta}
+                </button>
+              ))}
             </div>
           </>
         )}
@@ -325,6 +356,30 @@ export default function PasoClasificar({
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {clasificadas.length > 0 && (
+        <div className="barra-accion">
+          <div className="contenido">
+            <div className="estado">
+              <span className={`punto ${sinClasificar ? 'error' : porRevisar ? 'alerta' : 'ok'}`} />
+              <span>
+                {sinClasificar
+                  ? `${sinClasificar} cuenta(s) sin clasificar: asígnales un rubro o márcalas «no presentar».`
+                  : porRevisar
+                    ? `${porRevisar} propuesta(s) para revisar. Al continuar se confirman las propuestas pendientes.`
+                    : 'Todas las cuentas tienen rubro.'}
+              </span>
+            </div>
+            <button className="primario grande" onClick={confirmarYContinuar} disabled={confirmando || corriendo}>
+              {confirmando
+                ? 'Confirmando…'
+                : clasificadas.some((c) => c.clasificacion.estado === 'propuesta' && c.clasificacion.rubro_codigo)
+                  ? 'Confirmar propuestas y ver estados →'
+                  : 'Ver estados financieros →'}
+            </button>
+          </div>
         </div>
       )}
     </>

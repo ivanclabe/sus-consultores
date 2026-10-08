@@ -4,15 +4,16 @@ import Auth from './components/Auth'
 import PasoCargar from './components/PasoCargar'
 import PasoClasificar from './components/PasoClasificar'
 import PasoEstados from './components/PasoEstados'
+import type { Encabezado } from './lib/empresaArchivo'
 import { configuracionCompleta, supabase } from './lib/supabase'
 import type { Cuenta, CuentaClasificada, Informe, ReglaMapeo, Rubro } from './lib/types'
 
 type Paso = 1 | 2 | 3
 
-const PASOS: [Paso, string][] = [
-  [1, 'Cargar archivo'],
-  [2, 'Clasificar cuentas'],
-  [3, 'Estados y aprobación'],
+const PASOS: [Paso, string, string][] = [
+  [1, 'Cargar archivo', 'Hojas, períodos y empresa'],
+  [2, 'Clasificar cuentas', 'Reglas, memoria e IA'],
+  [3, 'Revisar y exportar', 'Estados, notas, PDF y Excel'],
 ]
 
 export default function App() {
@@ -24,7 +25,10 @@ export default function App() {
   const [informe, setInforme] = useState<Informe | null>(null)
   const [cuentas, setCuentas] = useState<Cuenta[]>([])
   const [clasificadas, setClasificadas] = useState<CuentaClasificada[]>([])
+  const [encabezado, setEncabezado] = useState<Encabezado | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Cambia con «Nuevo informe» para empezar el paso 1 desde cero.
+  const [intento, setIntento] = useState(0)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -56,12 +60,14 @@ export default function App() {
     setInforme(null)
     setCuentas([])
     setClasificadas([])
+    setEncabezado(null)
+    setIntento((i) => i + 1)
     setPaso(1)
   }
 
   if (!configuracionCompleta) {
     return (
-      <div className="app">
+      <div className="login-fondo">
         <div className="panel login">
           <h1>Falta configuración</h1>
           <p>
@@ -76,68 +82,93 @@ export default function App() {
   if (!listo) return <div className="app sutil-texto">Cargando…</div>
   if (!sesion) return <Auth />
 
+  // Se puede volver a cualquier paso ya alcanzado; avanzar solo con los botones de cada paso.
+  const alcanzado: Paso = !informe ? 1 : clasificadas.length === 0 ? 2 : 3
+
   return (
-    <div className="app">
-      <div className="barra">
-        <div className="marca">
-          Estados Financieros
-          <span>SusConsultores · del balance de comprobación al informe</span>
-        </div>
-        <div className="fila no-print">
-          {informe && <button onClick={reiniciar}>Nuevo informe</button>}
-          <button onClick={() => supabase.auth.signOut()}>Salir</button>
-        </div>
-      </div>
-
-      {error && <div className="aviso error">{error}</div>}
-      {rubros.length === 0 && !error && (
-        <div className="aviso alerta">
-          El catálogo de rubros está vacío. Ejecuta la migración de semilla o carga el catálogo
-          institucional de SusConsultores.
-        </div>
-      )}
-
-      <div className="pasos no-print">
-        {PASOS.map(([n, etiqueta]) => (
-          <div key={n} className={`paso ${paso === n ? 'activo' : ''} ${paso > n ? 'hecho' : ''}`}>
-            <b>{n}</b>
-            {etiqueta}
+    <>
+      <header className="encabezado-app">
+        <div className="contenido">
+          <div className="logo">
+            <div className="logo-marca">SC</div>
+            <div>
+              <b>Estados Financieros</b>
+              <span>SusConsultores · del balance de comprobación al informe</span>
+            </div>
           </div>
-        ))}
-      </div>
+          <div className="fila" style={{ alignItems: 'center' }}>
+            <span className="usuario">{sesion.user.email}</span>
+            {informe && <button onClick={reiniciar}>Nuevo informe</button>}
+            <button onClick={() => supabase.auth.signOut()}>Salir</button>
+          </div>
+        </div>
+      </header>
 
-      {paso === 1 && (
-        <PasoCargar
-          onListo={(inf, cts) => {
-            setInforme(inf)
-            setCuentas(cts)
-            setClasificadas([])
-            setPaso(2)
-          }}
-        />
-      )}
+      <main className="app">
+        {error && <div className="aviso error">{error}</div>}
+        {rubros.length === 0 && !error && (
+          <div className="aviso alerta">
+            El catálogo de rubros está vacío. Ejecuta la migración de semilla o carga el catálogo
+            institucional de SusConsultores.
+          </div>
+        )}
 
-      {paso === 2 && informe && (
-        <PasoClasificar
-          informe={informe}
-          cuentas={cuentas}
-          clasificadas={clasificadas}
-          rubros={rubros}
-          reglas={reglas}
-          onClasificadas={setClasificadas}
-          onContinuar={() => setPaso(3)}
-        />
-      )}
+        <nav className="pasos">
+          {PASOS.map(([n, etiqueta, ayuda]) => (
+            <button
+              key={n}
+              className={`paso ${paso === n ? 'activo' : ''} ${paso > n || (alcanzado > n && paso !== n) ? 'hecho' : ''}`}
+              disabled={n > alcanzado || n === paso}
+              onClick={() => setPaso(n)}
+            >
+              <span className="num">{paso > n || (alcanzado > n && paso !== n) ? '✓' : n}</span>
+              <span>
+                <b>{etiqueta}</b>
+                <small>{ayuda}</small>
+              </span>
+            </button>
+          ))}
+        </nav>
 
-      {paso === 3 && informe && (
-        <PasoEstados
-          informe={informe}
-          clasificadas={clasificadas}
-          rubros={rubros}
-          onAprobado={setInforme}
-          onVolver={() => setPaso(2)}
-        />
-      )}
-    </div>
+        {/* El paso 1 se mantiene montado: al volver, el archivo y su análisis siguen ahí. */}
+        <div hidden={paso !== 1}>
+          <PasoCargar
+            key={intento}
+            informe={informe}
+            onListo={(inf, cts, enc) => {
+              setInforme(inf)
+              setCuentas(cts)
+              setClasificadas([])
+              setEncabezado(enc)
+              setPaso(2)
+            }}
+          />
+        </div>
+
+        {paso === 2 && informe && (
+          <PasoClasificar
+            informe={informe}
+            cuentas={cuentas}
+            clasificadas={clasificadas}
+            rubros={rubros}
+            reglas={reglas}
+            onClasificadas={setClasificadas}
+            onContinuar={() => setPaso(3)}
+          />
+        )}
+
+        {paso === 3 && informe && encabezado && (
+          <PasoEstados
+            informe={informe}
+            clasificadas={clasificadas}
+            rubros={rubros}
+            encabezado={encabezado}
+            onEncabezado={setEncabezado}
+            onAprobado={setInforme}
+            onVolver={() => setPaso(2)}
+          />
+        )}
+      </main>
+    </>
   )
 }

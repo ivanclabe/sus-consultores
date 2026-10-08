@@ -441,14 +441,15 @@ function validarClasificacion(
               .join(' '),
   })
 
+  // Las notas son opcionales: si el libro no las trae, se arman desde el balance.
   v.push({
     codigo: 'C-05',
-    titulo: 'Se identificaron las hojas de notas',
-    ok: de('notas').length > 0,
-    bloqueante: true,
+    titulo: 'Hojas de notas (opcional)',
+    ok: true,
+    bloqueante: false,
     detalle: de('notas').length
       ? lista(de('notas').map((h) => h.nombre)) + '.'
-      : 'No se encontró una hoja claramente identificable como notas. Asigna la hoja de notas a mano.',
+      : 'El libro no trae hoja de notas. No es necesaria: las notas del informe se arman desde el balance de comprobación.',
   })
 
   const revision = de('revision')

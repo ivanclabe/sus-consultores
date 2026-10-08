@@ -17,14 +17,17 @@ del código.
 | Clasificar TODAS las hojas: tipo, período y destino (año actual / anterior / notas) | `src/lib/clasificarHojas.ts` | determinístico |
 | …solo si las reglas dejan algo sin resolver | `src/lib/clasificarConIA.ts` + `supabase/functions/sc-identificar-hojas` | **IA**, el código acepta solo lo verificable |
 | Extraer toda la jerarquía de cada balance, con terceros | `src/lib/parseBalance.ts` | determinístico |
-| Extraer las notas del archivo (detalle, subtotales, totales) | `src/lib/parseNotas.ts` | determinístico |
+| Extraer las notas del archivo (opcional: si no hay hoja de notas, el flujo sigue) | `src/lib/parseNotas.ts` | determinístico |
+| Leer los datos corporativos del archivo (razón social, NIT, corte, firmantes) | `src/lib/empresaArchivo.ts` | determinístico |
 | Validar la extracción (E-01 a E-13) | `src/lib/procesarLibro.ts` | determinístico |
 | Mapeo por memoria de la empresa y por prefijo PUC | `src/lib/clasificar.ts` | determinístico |
 | Clasificación de lo que las reglas no cubren | `supabase/functions/sc-clasificar-cuentas` | **IA** |
 | Verificación de la salida del modelo contra el catálogo | la misma función, al final | determinístico |
 | Sumas por nota, rubro y periodo | `src/lib/calculos.ts` | determinístico |
 | Validaciones de cuadre | `src/lib/validaciones.ts` | determinístico |
-| Excel y PDF | `src/lib/exportar.ts` | determinístico |
+| Presentación común (secciones, variaciones, notas numeradas) | `src/lib/documento.ts` | determinístico |
+| Plantilla institucional en Excel (ExcelJS) | `src/lib/plantillaExcel.ts` | determinístico |
+| Plantilla institucional en PDF (pdfmake) | `src/lib/plantillaPDF.ts` | determinístico |
 
 El modelo **no recibe saldos**: solo código y nombre de cuenta. No puede alterar
 una cifra ni aunque quisiera.
@@ -76,10 +79,21 @@ Las migraciones de `supabase/migrations/` ya están aplicadas.
 2. **Clasificar** — memoria → reglas → modelo. La tabla abre filtrada por lo que
    necesita atención: sin clasificar y propuestas de baja confianza. Cada cambio
    del contador se guarda como memoria de esa empresa y no se vuelve a preguntar.
-3. **Estados y aprobación** — notas, ESF y ER calculados, con el tablero de
-   validaciones. El balance incluye el resultado del periodo dentro del
-   patrimonio. Las validaciones bloqueantes impiden aprobar. Aprobado el
-   informe, se descarga el Excel o se imprime a PDF.
+3. **Revisar y exportar** — vista previa con el formato del informe final (ESF,
+   ER y notas con variación entre años), estado de las validaciones y el
+   encabezado editable (razón social, NIT, ciudad, fechas de corte, firmantes).
+   El balance incluye el resultado del periodo dentro del patrimonio. Las
+   validaciones bloqueantes impiden aprobar. Aprobado el informe, se descarga en
+   PDF o en Excel con la plantilla institucional: portada, estados con firmas,
+   notas numeradas y, en el Excel, una hoja de control de uso interno.
+
+**Datos de la empresa.** Al cargar el libro se leen la razón social y el NIT de la
+cabecera de Siigo de los balances usados (`Siigo - EMPRESA SAS`, `NIT 900507954 -3`),
+la fecha de corte de cada período (`A : DIC 31/2025`) y, si los hay, los firmantes
+de los estados ya armados. La empresa se reconoce por NIT o por nombre; si otra hoja
+menciona otra empresa (una plantilla copiada de otro cliente), se avisa. Los
+firmantes se recuerdan por empresa (`sc_empresas`) y el encabezado queda con el
+informe (`sc_informes.encabezado`).
 
 ## Decisiones que tomó el código y conviene revisar con el cliente
 
@@ -89,7 +103,7 @@ Las migraciones de `supabase/migrations/` ya están aplicadas.
 | **Periodo comparativo** | Sale de la hoja de balance del año anterior, dentro del mismo libro | Resuelto con el archivo de 2025-2024. Un libro sin esa hoja se bloquea con un mensaje claro |
 | **Notas del archivo** | Se extraen y se muestran tal como vienen, en el orden del archivo | Los totales generales ("TOTAL ACTIVOS") quedan dentro del bloque de la nota anterior, igual que en el Excel |
 | **Signo de los saldos acreedores** | Se detecta del archivo: si pasivo + patrimonio + ingresos suma negativo, se invierte para presentar | El cliente nunca habló de convención de signos |
-| **Formato de presentación** | Layout propio, legible e imprimible | **No es** el formato institucional de SusConsultores. Falta el archivo de referencia para replicarlo (RF-022) |
+| **Formato de presentación** | Plantilla propia (portada, encabezado con razón social y NIT, variaciones, firmas) en PDF carta y Excel | Validar con SusConsultores colores, logo y textos fijos (RF-022). Las notas sin saldo en los dos años no se presentan y las demás se numeran seguidas |
 | **Archivo fuente** | No se almacena; solo lo que se extrae de él | RNF-12 quedó por confirmar; esta es la opción más conservadora |
 | **Memoria de correcciones** | Activa, por empresa | En el documento es fase futura. Se puede desactivar borrando `sc_mapeos_confirmados` |
 | **Datos a un servicio externo** | Códigos y nombres de cuenta viajan a la API de Anthropic; los saldos no | Pregunta **P4**: la autorización es del cliente, no del equipo técnico |

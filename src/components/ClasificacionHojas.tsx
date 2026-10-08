@@ -55,20 +55,14 @@ export default function ClasificacionHojas({
   const hayManuales = c.hojas.some((h) => h.manual)
 
   return (
-    <div className="panel">
-      <div className="fila" style={{ justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <h2>Clasificación de las hojas</h2>
-        <span className="sutil-texto">
-          {c.hojas.length} hojas · {METODO[c.metodo]}
-        </span>
-      </div>
+    <div>
       <p className="sutil-texto">
-        Cada hoja se asigna a un solo destino según su contenido. Revisa que la clasificación sea
-        correcta antes de continuar; puedes cambiar cualquier destino.
+        {c.hojas.length} hojas {METODO[c.metodo]}. Cada hoja va a un solo destino según su contenido; puedes
+        cambiar cualquiera. La hoja de notas es opcional.
       </p>
 
       <div className="fila" style={{ marginBottom: 12 }}>
-        <div className="campo">
+        <div className="campo" style={{ width: 150 }}>
           <label htmlFor="anio-actual">Período actual</label>
           <select
             id="anio-actual"
@@ -87,7 +81,7 @@ export default function ClasificacionHojas({
             ))}
           </select>
         </div>
-        <div className="campo">
+        <div className="campo" style={{ width: 150 }}>
           <label htmlFor="anio-anterior">Período anterior</label>
           <select
             id="anio-anterior"
@@ -133,6 +127,7 @@ export default function ClasificacionHojas({
                     value={h.destino}
                     onChange={(e) => onDestino(h.nombre, e.target.value as Destino)}
                     className={`destino ${DESTINO_CLASE[h.destino]}`}
+                    style={{ width: 'auto' }}
                   >
                     {h.destino === 'revision' && <option value="revision">{etiquetaDestino('revision')}</option>}
                     {(['actual', 'anterior', 'notas', 'ignorada'] as Destino[]).map((d) => (
@@ -177,8 +172,10 @@ export default function ClasificacionHojas({
         </div>
       ) : (
         <div className="aviso ok" style={{ marginTop: 12 }}>
-          Clasificación completa: año actual {c.anioActual}, año anterior {c.anioAnterior}, y{' '}
-          {c.hojas.filter((h) => h.destino === 'notas').length} hoja(s) de notas.
+          Clasificación completa: año actual {c.anioActual}, año anterior {c.anioAnterior}
+          {c.hojas.some((h) => h.destino === 'notas')
+            ? `, y ${c.hojas.filter((h) => h.destino === 'notas').length} hoja(s) de notas.`
+            : '. Sin hoja de notas: se arman desde el balance.'}
         </div>
       )}
       {c.razon && <div className="aviso info">IA: {c.razon}</div>}

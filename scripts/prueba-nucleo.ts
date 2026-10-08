@@ -26,6 +26,7 @@ import { procesarLibro } from '../src/lib/procesarLibro'
 import { extraerNotas } from '../src/lib/parseNotas'
 import { buscarLinea, construirEstados } from '../src/lib/calculos'
 import { ejecutarValidaciones } from '../src/lib/validaciones'
+import { encabezadoInicial, extraerDatosCorporativos, normalizarNit, presentarRazonSocial } from '../src/lib/empresaArchivo'
 import type { CuentaClasificada, Rubro } from '../src/lib/types'
 
 let fallos = 0
@@ -462,7 +463,10 @@ function casosDeError(Y: number) {
     [detalle(a.c, 'C-02')?.ok, detalle(a.c, 'C-02')?.detalle.includes(`No se encontró el balance de comprobación de ${Y - 1}`)], [false, true])
 
   const c = probar({ sinNotas: true })
-  chequear('sin hoja de notas: C-05 bloquea', detalle(c.c, 'C-05')?.ok, false)
+  chequear('sin hoja de notas: C-05 no bloquea', detalle(c.c, 'C-05')?.ok, true)
+  chequear('…la clasificación queda completa', c.c.validaciones.some((x) => x.bloqueante && !x.ok), false)
+  chequear('…y el flujo avanza con las cuentas de los dos años',
+    [c.r.validaciones.some((x) => x.bloqueante && !x.ok), c.r.cuentas.length > 0, c.r.notas], [false, true, null])
 
   const d = probar({ errorDeCelda: true })
   chequear('celda con #REF! en el balance: bloquea con la celda',
@@ -479,7 +483,35 @@ for (const [entrada, esperado] of [
   chequear(`parseNumero(${JSON.stringify(entrada)})`, parseNumero(entrada), esperado)
 }
 
+function datosCorporativos(Y: number) {
+  console.log(`\n══ Datos corporativos (${Y}) ══`)
+  for (const [entrada, esperado] of [
+    ['NIT   900507954    -3', '900.507.954-3'], ['NIT. 900,888.897-5', '900.888.897-5'],
+    ['NIT 901.466.842-3', '901.466.842-3'], ['NIT : 900888897    -5', '900.888.897-5'], ['NIT', null],
+  ] as [string, string | null][]) {
+    chequear(`normalizarNit(${JSON.stringify(entrada)})`, normalizarNit(entrada), esperado)
+  }
+  chequear('sufijo societario presentable', presentarRazonSocial('EMPRESA DEMO SAS'), 'EMPRESA DEMO S.A.S.')
+
+  const wb = libro(Y)
+  const c = clasificarLibro(analizarLibro(wb))
+  const n = (d: Destino) => hojasDe(c, d).map((h) => h.nombre)
+  const d = extraerDatosCorporativos(wb, { actual: n('actual'), anterior: n('anterior'), resto: n('notas') })
+  chequear('razón social desde la cabecera de Siigo del balance actual', [d.razonSocial?.valor, d.razonSocial?.hoja], ['EMPRESA DEMO S.A.S.', `BALANCE${String(Y).slice(2)}`])
+  chequear('NIT del balance', d.nit?.valor, '900.888.897-5')
+  chequear('fecha de corte de cada período', [d.corteActual?.valor, d.corteAnterior?.valor], [`31 de diciembre de ${Y}`, `31 de diciembre de ${Y - 1}`])
+  const e = encabezadoInicial(d, c.anioActual, c.anioAnterior, { ciudad: 'Medellín', razonSocial: 'OTRA' })
+  chequear('el archivo manda sobre lo guardado; lo que no trae se completa con lo guardado', [e.razonSocial, e.ciudad], ['EMPRESA DEMO S.A.S.', 'Medellín'])
+
+  // Una hoja copiada de otro cliente se reporta.
+  const otro = libro(Y)
+  XLSX.utils.book_append_sheet(otro, XLSX.utils.aoa_to_sheet([['OTRO CLIENTE LTDA'], ['NIT 800.111.222-1'], ['Notas']]), 'NOTAS VIEJAS')
+  const d2 = extraerDatosCorporativos(otro, { actual: n('actual'), anterior: n('anterior'), resto: [] })
+  chequear('hoja de otra empresa: se reporta', d2.otrasEmpresas.map((x) => x.hoja), ['NOTAS VIEJAS'])
+}
+
 const Y = 2025
+datosCorporativos(Y)
 flujoCompleto(Y)
 flujoCompleto(Y + 1)
 notasFormatoB(Y)

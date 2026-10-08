@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual técnico — Despliegue de Estados Financieros SusConsultores</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm; }
+  @page :first { margin: 0; }
+
+  :root {
+    --tinta: #1b2028;
+    --suave: #667085;
+    --borde: #dfe3e8;
+    --acento: #1f5f8b;
+    --acento-claro: #eaf2f8;
+    --ok: #1a7f4b;
+    --ok-claro: #e8f5ee;
+    --alerta: #9a6700;
+    --alerta-claro: #fdf6e3;
+    --error: #b3261e;
+    --error-claro: #fdeceb;
+    --ia: #6b3fa0;
+    --ia-claro: #f3eefc;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--tinta); font-size: 10pt; line-height: 1.55;
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, h4 { margin: 0 0 6px; line-height: 1.25; letter-spacing: -0.012em; }
+  h2 { font-size: 17pt; color: var(--acento); margin-top: 0; }
+  h3 { font-size: 12pt; margin-top: 20px; }
+  h4 { font-size: 10pt; margin-top: 14px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 18px; }
+  li { margin-bottom: 4px; }
+  code { font-family: 'SF Mono', Menlo, monospace; font-size: 8.5pt;
+         background: #f1f3f5; padding: 1px 4px; border-radius: 3px; }
+  strong { font-weight: 650; }
+
+  /* ---------- portada ---------- */
+  .portada {
+    height: 297mm; padding: 42mm 22mm 20mm; display: flex; flex-direction: column;
+    background: linear-gradient(160deg, #1f5f8b 0%, #14405f 100%); color: #fff;
+  }
+  .portada .kicker { font-size: 10pt; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.72; }
+  .portada h1 { font-size: 34pt; font-weight: 600; margin: 14px 0 10px; color: #fff; }
+  .portada .sub { font-size: 13pt; opacity: 0.88; max-width: 118mm; line-height: 1.5; }
+  .portada .regla { height: 3px; width: 56px; background: #8fc4e6; margin: 26px 0; }
+  .portada .pie { margin-top: auto; font-size: 9.5pt; opacity: 0.8; }
+  .portada .pie b { display: block; font-weight: 600; opacity: 1; margin-bottom: 2px; }
+  .indice { margin-top: 30px; font-size: 10.5pt; }
+  .indice div { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.18); opacity: 0.92; }
+  .indice span { display: inline-block; width: 26px; opacity: 0.65; }
+
+  /* ---------- estructura ---------- */
+  section { page-break-before: always; }
+  .cabecera {
+    display: flex; align-items: baseline; gap: 10px; border-bottom: 2px solid var(--acento);
+    padding-bottom: 6px; margin-bottom: 16px;
+  }
+  .cabecera .n {
+    background: var(--acento); color: #fff; width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10pt; font-weight: 700; flex: none; align-self: center;
+  }
+  .lead { font-size: 11pt; color: #3d4753; margin-bottom: 14px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0 0 12px; font-size: 9pt; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { background: #f6f7f9; font-size: 7.8pt; text-transform: uppercase;
+       letter-spacing: 0.05em; color: var(--suave); font-weight: 700; }
+  td.c { text-align: center; }
+  tbody tr:nth-child(even) td { background: #fbfcfd; }
+
+  .caja { border: 1px solid var(--borde); border-radius: 6px; padding: 11px 13px; margin: 0 0 12px; }
+  .caja > :last-child { margin-bottom: 0; }
+  .caja.nota  { background: var(--acento-claro); border-color: #c5ddec; }
+  .caja.ok    { background: var(--ok-claro);     border-color: #bfe3ce; }
+  .caja.ojo   { background: var(--alerta-claro); border-color: #eedba6; }
+  .caja.stop  { background: var(--error-claro);  border-color: #f3c6c3; }
+  .caja b.tit { display: block; font-size: 8pt; text-transform: uppercase;
+                letter-spacing: 0.07em; margin-bottom: 4px; }
+  .caja.nota b.tit { color: var(--acento); }
+  .caja.ok   b.tit { color: var(--ok); }
+  .caja.ojo  b.tit { color: var(--alerta); }
+  .caja.stop b.tit { color: var(--error); }
+
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 99px; font-size: 7.5pt;
+          font-weight: 700; border: 1px solid var(--borde); white-space: nowrap; }
+  .pill.regla   { background: var(--acento-claro); border-color: #c5ddec; color: var(--acento); }
+  .pill.memoria { background: var(--ok-claro);     border-color: #bfe3ce; color: var(--ok); }
+  .pill.ia      { background: var(--ia-claro);     border-color: #ddd0f2; color: var(--ia); }
+  .pill.manual  { background: #eef1f4; color: #4a5560; }
+  .pill.pend    { background: var(--alerta-claro); border-color: #eedba6; color: var(--alerta); }
+
+  /* ---------- maqueta de pantalla ---------- */
+  .pantalla {
+    border: 1px solid #cdd4da; border-radius: 7px; overflow: hidden;
+    margin: 0 0 8px; background: #fff; font-size: 8pt; page-break-inside: avoid;
+  }
+  .pantalla .top { background: #eef1f4; border-bottom: 1px solid #cdd4da; padding: 5px 9px;
+                   display: flex; align-items: center; gap: 5px; }
+  .pantalla .top i { width: 7px; height: 7px; border-radius: 50%; background: #cdd4da; display: inline-block; }
+  .pantalla .top span { margin-left: 6px; color: var(--suave); font-style: normal; font-size: 7.5pt; }
+  .pantalla .cuerpo { padding: 11px 13px; background: #f6f7f9; }
+  .pantalla .tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 5px; padding: 9px 11px; margin-bottom: 8px; }
+  .pantalla .tarjeta:last-child { margin-bottom: 0; }
+  .pasos-ui { display: flex; gap: 4px; margin-bottom: 8px; }
+  .pasos-ui div { border: 1px solid var(--borde); border-radius: 99px; padding: 3px 10px;
+                  background: #fff; color: var(--suave); font-size: 7.5pt; }
+  .pasos-ui div.on { border-color: var(--acento); background: var(--acento-claro);
+                     color: var(--acento); font-weight: 700; }
+  .metricas { display: flex; gap: 6px; margin-bottom: 8px; }
+  .metricas div { border: 1px solid var(--borde); border-radius: 5px; padding: 6px 9px; flex: 1; background: #fff; }
+  .metricas b { display: block; font-size: 13pt; line-height: 1.1; }
+  .metricas span { font-size: 7pt; color: var(--suave); }
+  .mini { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin: 0; }
+  .mini th, .mini td { padding: 3px 5px; border-bottom: 1px solid #eceff2; }
+  .mini th { background: none; font-size: 6.8pt; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .campo-ui { display: inline-block; border: 1px solid var(--borde); border-radius: 4px;
+              padding: 2px 7px; background: #fff; margin-right: 5px; font-size: 7.5pt; }
+  .boton-ui { display: inline-block; border-radius: 4px; padding: 3px 10px;
+              background: var(--acento); color: #fff; font-size: 7.5pt; font-weight: 600; }
+  .boton-ui.gris { background: #fff; color: var(--tinta); border: 1px solid var(--borde); font-weight: 400; }
+
+  .marca { display: inline-flex; align-items: center; justify-content: center;
+           width: 14px; height: 14px; border-radius: 50%; background: var(--acento);
+           color: #fff; font-size: 7.5pt; font-weight: 700; margin-right: 5px; flex: none; }
+  .llamadas { margin: 0 0 14px; padding: 0; list-style: none; font-size: 9pt; }
+  .llamadas li { display: flex; margin-bottom: 5px; }
+  .llamadas .marca { margin-top: 1px; }
+
+  .flujo { display: flex; align-items: stretch; gap: 6px; margin: 0 0 14px; }
+  .flujo .f { flex: 1; border: 1px solid var(--borde); border-radius: 6px; padding: 9px;
+              background: #fff; text-align: center; font-size: 8.5pt; }
+  .flujo .f b { display: block; color: var(--acento); margin-bottom: 2px; font-size: 9pt; }
+  .flujo .f span { color: var(--suave); font-size: 7.5pt; }
+  .flujo .a { align-self: center; color: #b6bfc8; font-size: 12pt; }
+  .evitar-corte { page-break-inside: avoid; }
+</style>
+<style>
+  pre {
+    font-family: 'SF Mono', Menlo, monospace; font-size: 8.3pt; line-height: 1.45;
+    background: #1f2933; color: #e6edf3; border-radius: 6px; padding: 9px 12px;
+    margin: 0 0 12px; white-space: pre-wrap; word-break: break-word; page-break-inside: avoid;
+  }
+  pre .c { color: #8b98a5; }
+  .paso-num { display: inline-flex; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--acento); color: #fff; font-size: 8pt; font-weight: 700;
+    align-items: center; justify-content: center; margin-right: 6px; }
+  ol.pasos { padding-left: 0; list-style: none; counter-reset: p; }
+  ol.pasos > li { counter-increment: p; position: relative; padding-left: 26px; margin-bottom: 7px; }
+  ol.pasos > li::before { content: counter(p); position: absolute; left: 0; top: 1px;
+    width: 18px; height: 18px; border-radius: 50%; background: var(--acento); color: #fff;
+    font-size: 8pt; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .arq { display: grid; grid-template-columns: 1fr 22px 1.3fr 22px 1fr; align-items: center; margin: 4px 0 14px; }
+  .arq .caja { margin: 0; text-align: center; font-size: 8.8pt; }
+  .arq .fl { text-align: center; color: #9aa6b2; font-size: 13pt; }
+  .caja { page-break-inside: avoid; }
+  table.compacta { margin-bottom: 8px; }
+  table.compacta td { padding: 3px 7px; font-size: 8.6pt; }
+  .check td:first-child { width: 22px; font-size: 11pt; color: var(--suave); }
+</style>
+
+</head>
+<body>
+<div class="portada" style="background: linear-gradient(160deg, #1f2933 0%, #0f1720 100%);">
+  <div class="kicker">SusConsultores · Manual técnico</div>
+  <h1>Despliegue e instalación</h1>
+  <div class="sub">Cómo poner en marcha la app de Estados Financieros desde cero: repositorio, Supabase, Claude, base de datos, funciones y publicación.</div>
+  <div class="regla" style="background:#5fa8d3"></div>
+  <div class="indice">
+    <div><span>1</span> Arquitectura</div>
+    <div><span>2</span> Requisitos</div>
+    <div><span>3</span> Repositorio</div>
+    <div><span>4</span> Cuenta y proyecto en Supabase</div>
+    <div><span>5</span> API key de Claude (Anthropic)</div>
+    <div><span>6</span> Instalar el proyecto</div>
+    <div><span>7</span> Variables de entorno</div>
+    <div><span>8</span> Migrar la base de datos</div>
+    <div><span>9</span> Edge Functions y secreto de Claude</div>
+    <div><span>10</span> Usuarios y acceso</div>
+    <div><span>11</span> Probar en local</div>
+    <div><span>12</span> Publicar el frontend</div>
+    <div><span>13</span> Operación y mantenimiento</div>
+    <div><span>14</span> Seguridad y problemas conocidos</div>
+    <div><span>15</span> Lista de verificación</div>
+  </div>
+  <div class="pie">
+    <b>Versión 1.0 · 26 de septiembre de 2026</b>
+    Referido al repositorio <code style="background:rgba(255,255,255,.12);color:#fff">ivanclabe/susconsultores-estados-financieros</code>, rama <code style="background:rgba(255,255,255,.12);color:#fff">main</code>.
+  </div>
+</div>
+
+<section>
+  <div class="cabecera"><span class="n">1</span><h2>Arquitectura</h2></div>
+  <p class="lead">
+    Una aplicación React que corre en el navegador, sobre Supabase (login, base de datos y dos
+    funciones de servidor) y Claude para la clasificación asistida. El Excel se lee en el
+    navegador: nunca se sube al servidor.
+  </p>
+
+  <div class="arq">
+    <div class="caja nota"><b>Navegador</b><br>React + Vite<br><span class="sutil-texto" style="font-size:7.5pt">lee el Excel, calcula, valida, exporta</span></div>
+    <div class="fl">⇄</div>
+    <div class="caja ok"><b>Supabase</b><br>Auth · Postgres (tablas <code>sc_</code>)<br>Edge Functions</div>
+    <div class="fl">→</div>
+    <div class="caja ojo"><b>Anthropic</b><br>API de Claude<br><span class="sutil-texto" style="font-size:7.5pt">solo desde las funciones</span></div>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:24%">Pieza</th><th style="width:30%">Qué hace</th><th>Dónde vive</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Frontend</strong></td><td>Interfaz, lectura del Excel, clasificación de hojas, extracción, cálculos, validaciones, Excel y PDF</td><td><code>src/</code>. Se compila a archivos estáticos (<code>dist/</code>) y se sirve con nginx.</td></tr>
+      <tr><td><strong>Supabase Auth</strong></td><td>Inicio de sesión con correo y contraseña</td><td>Proyecto de Supabase</td></tr>
+      <tr><td><strong>Base de datos</strong></td><td>Empresas, informes, cuentas, clasificaciones, memoria de correcciones, notas, validaciones, auditoría, catálogo institucional</td><td>Postgres del proyecto; esquema en <code>supabase/migrations/</code></td></tr>
+      <tr><td><strong><code>sc-identificar-hojas</code></strong></td><td>Pide a Claude tipo y período de las hojas que las reglas no resolvieron</td><td><code>supabase/functions/</code></td></tr>
+      <tr><td><strong><code>sc-clasificar-cuentas</code></strong></td><td>Pide a Claude el rubro de las cuentas que las reglas no cubren</td><td><code>supabase/functions/</code></td></tr>
+      <tr><td><strong>Claude</strong></td><td>Modelo <code>claude-sonnet-5</code>. Recibe texto (nombres de hojas y cuentas), nunca saldos</td><td>API de Anthropic, llamada solo desde las Edge Functions</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja nota">
+    <b class="tit">Por qué la llave de Claude no está en el frontend</b>
+    <p style="margin:0">
+      Todo lo que va en el frontend es visible para cualquiera que abra la app. Por eso la llave de
+      Anthropic vive como secreto de Supabase y solo la leen las Edge Functions. El frontend solo
+      conoce la URL del proyecto y la llave <em>publicable</em>, que está diseñada para ser pública
+      y depende de las políticas de acceso (RLS) de la base.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">2</span><h2>Requisitos</h2></div>
+
+  <h3>Cuentas</h3>
+  <table>
+    <thead><tr><th style="width:24%">Cuenta</th><th style="width:36%">Para qué</th><th>Notas</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GitHub</strong></td><td>Acceso al repositorio</td><td>Si el repositorio es privado, el propietario (<code>ivanclabe</code>) debe dar acceso a quien despliegue.</td></tr>
+      <tr><td><strong>Supabase</strong></td><td>Login, base de datos y funciones</td><td>El plan gratuito alcanza para empezar. Ver capítulo 4.</td></tr>
+      <tr><td><strong>Anthropic</strong></td><td>API de Claude</td><td>De prepago: requiere cargar créditos. Ver capítulo 5.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Herramientas en la máquina de quien despliega</h3>
+  <table>
+    <thead><tr><th style="width:24%">Herramienta</th><th style="width:22%">Versión probada</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Git</strong></td><td>cualquiera reciente</td><td>Clonar el repositorio</td></tr>
+      <tr><td><strong>Node.js</strong> y <strong>npm</strong></td><td>Node 20 o superior</td><td>Instalar dependencias, correr y compilar. El contenedor de Docker usa Node 20.</td></tr>
+      <tr><td><strong>Supabase CLI</strong></td><td>2.114</td><td>Aplicar migraciones, desplegar funciones y cargar el secreto</td></tr>
+      <tr><td><strong>Docker</strong></td><td>29</td><td>Solo para publicar con el <code>Dockerfile</code> incluido</td></tr>
+    </tbody>
+  </table>
+
+  <p>Instalación de la Supabase CLI:</p>
+<pre><span class="c"># macOS</span>
+brew install supabase/tap/supabase
+
+<span class="c"># Windows (con Scoop)</span>
+scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+scoop install supabase
+
+<span class="c"># Linux o cualquier sistema con Node: sin instalar, anteponiendo npx</span>
+npx supabase --version</pre>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">3</span><h2>Repositorio</h2></div>
+  <table>
+    <tbody>
+      <tr><td style="width:28%"><strong>GitHub</strong></td><td><code>https://github.com/ivanclabe/susconsultores-estados-financieros</code></td></tr>
+      <tr><td><strong>Rama principal</strong></td><td><code>main</code></td></tr>
+      <tr><td><strong>Copia de trabajo actual</strong></td><td><code>~/Workspace/susconsultores-estados-financieros</code> en el equipo de desarrollo</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Estructura</h3>
+  <table>
+    <thead><tr><th style="width:36%">Ruta</th><th>Contenido</th></tr></thead>
+    <tbody>
+      <tr><td><code>src/components/</code></td><td>Pantallas: ingreso, carga y clasificación de hojas, clasificación de cuentas, estados y aprobación</td></tr>
+      <tr><td><code>src/lib/</code></td><td>Lógica: lectura de Excel, clasificación de hojas, extracción, cálculos, validaciones, exportación, clientes de Supabase y de las funciones</td></tr>
+      <tr><td><code>supabase/migrations/</code></td><td>Los 4 scripts SQL del esquema, en orden</td></tr>
+      <tr><td><code>supabase/functions/</code></td><td>Las 2 Edge Functions que llaman a Claude</td></tr>
+      <tr><td><code>scripts/</code></td><td>Prueba del núcleo (197 comprobaciones) y diagnóstico de un Excel real</td></tr>
+      <tr><td><code>docs/</code></td><td>Manuales</td></tr>
+      <tr><td><code>Dockerfile</code>, <code>nginx.conf</code>, <code>docker-compose.yml</code></td><td>Publicación con Docker</td></tr>
+      <tr><td><code>.env.example</code></td><td>Plantilla de variables de entorno</td></tr>
+    </tbody>
+  </table>
+</section>
+<section>
+  <div class="cabecera"><span class="n">4</span><h2>Cuenta y proyecto en Supabase</h2></div>
+  <p class="lead">
+    Se recomienda un <strong>proyecto dedicado</strong> para SusConsultores. El proyecto de
+    desarrollo actual está compartido con otras cuatro aplicaciones (ver capítulo 14).
+  </p>
+
+  <h3>Crear la cuenta</h3>
+  <ol class="pasos">
+    <li>Entrar a <code>https://supabase.com</code> y pulsar <strong>Start your project</strong>.</li>
+    <li>Registrarse con GitHub o con correo. Si es con correo, confirmar el enlace que llega.</li>
+    <li>Crear una <strong>organización</strong> (por ejemplo, <em>SusConsultores</em>) y elegir el plan. El gratuito sirve para empezar; en él los proyectos se pausan tras una semana sin uso.</li>
+  </ol>
+
+  <h3>Crear el proyecto</h3>
+  <ol class="pasos">
+    <li>En la organización, pulsar <strong>New project</strong>.</li>
+    <li><strong>Name:</strong> por ejemplo <code>susconsultores-eeff</code>.</li>
+    <li><strong>Database password:</strong> generar una contraseña fuerte y <strong>guardarla</strong> en un gestor de contraseñas. La pide la CLI al vincular el proyecto.</li>
+    <li><strong>Region:</strong> la más cercana a los usuarios. Para Colombia, <em>South America (São Paulo)</em> o una región de Estados Unidos (este).</li>
+    <li>Pulsar <strong>Create new project</strong> y esperar uno o dos minutos a que termine de aprovisionarse.</li>
+  </ol>
+
+  <h3>Datos que se van a necesitar</h3>
+  <table>
+    <thead><tr><th style="width:26%">Dato</th><th style="width:38%">Dónde está</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Project URL</strong></td><td>Botón <strong>Connect</strong> del proyecto, o <em>Project Settings → Data API</em></td><td><code>https://abcdefghijkl.supabase.co</code></td></tr>
+      <tr><td><strong>Project ref</strong></td><td>La parte de la URL antes de <code>.supabase.co</code></td><td><code>abcdefghijkl</code></td></tr>
+      <tr><td><strong>Publishable key</strong></td><td><em>Project Settings → API Keys</em></td><td><code>sb_publishable_…</code> (la llave <em>anon</em> clásica también funciona)</td></tr>
+      <tr><td><strong>Database password</strong></td><td>La que se definió al crear el proyecto</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja stop">
+    <b class="tit">Nunca en el frontend</b>
+    <p style="margin:0">
+      Las llaves <em>secret</em> o <em>service_role</em> saltan todas las reglas de acceso. No
+      van en <code>.env.local</code> ni en el repositorio. Esta app no las necesita.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">5</span><h2>API key de Claude (Anthropic)</h2></div>
+  <p class="lead">
+    La API de Claude se paga por uso, con créditos cargados por adelantado. La llave se muestra
+    una sola vez al crearla.
+  </p>
+  <ol class="pasos">
+    <li>Entrar a <code>https://console.anthropic.com</code> y crear la cuenta (correo o Google). Confirmar el correo.</li>
+    <li>Completar los datos de la organización cuando la consola los pida.</li>
+    <li>Ir a <strong>Settings → Billing</strong> y cargar créditos. Sin saldo, la API responde con error.</li>
+    <li>Recomendado: en <strong>Settings → Limits</strong>, definir un límite de gasto mensual.</li>
+    <li>Ir a <strong>Settings → API Keys</strong> y pulsar <strong>Create Key</strong>. Nombrarla, por ejemplo, <code>susconsultores-produccion</code>.</li>
+    <li><strong>Copiar la llave en ese momento</strong> (empieza por <code>sk-ant-</code>) y guardarla en un gestor de contraseñas. No se puede volver a ver; si se pierde, se crea otra.</li>
+  </ol>
+
+  <table>
+    <tbody>
+      <tr><td style="width:30%"><strong>Modelo que usa la app</strong></td><td><code>claude-sonnet-5</code>, en la constante <code>MODELO</code> de cada función (<code>supabase/functions/*/index.ts</code>)</td></tr>
+      <tr><td><strong>Dónde se configura la llave</strong></td><td>Solo como secreto de Supabase: <code>ANTHROPIC_API_KEY</code> (capítulo 9)</td></tr>
+      <tr><td><strong>Qué recibe Claude</strong></td><td>Nombres, títulos y encabezados de hojas; códigos y nombres de cuentas. <strong>Nunca saldos.</strong></td></tr>
+      <tr><td><strong>Cuándo se llama</strong></td><td>Solo cuando las reglas no alcanzan. Con el archivo de prueba de 2025-2024 no hizo falta ninguna llamada.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja ojo">
+    <b class="tit">Decisión de SusConsultores</b>
+    <p style="margin:0">
+      Aunque no viajan saldos, sí salen de la oficina los nombres de cuentas y de hojas de los
+      clientes (por ejemplo, el nombre de un banco o de un tercero). Confirmar con la firma que eso
+      es aceptable antes de activar la IA. Sin la llave, la app funciona igual con reglas y
+      asignación manual.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">6</span><h2>Instalar el proyecto</h2></div>
+<pre><span class="c"># 1. Clonar</span>
+git clone https://github.com/ivanclabe/susconsultores-estados-financieros.git
+cd susconsultores-estados-financieros
+
+<span class="c"># 2. Instalar dependencias (usa package-lock.json: versiones exactas)</span>
+npm ci
+
+<span class="c"># 3. Comprobar que compila</span>
+npm run typecheck</pre>
+
+  <p>
+    La dependencia <code>xlsx</code> se descarga desde el CDN oficial de SheetJS
+    (<code>cdn.sheetjs.com</code>), no desde npm. Si la red lo bloquea, <code>npm ci</code> falla en ese paso.
+  </p>
+</section>
+
+<section style="page-break-before:auto; margin-top:26px">
+  <div class="cabecera"><span class="n">7</span><h2>Variables de entorno</h2></div>
+<pre>cp .env.example .env.local</pre>
+  <p>Editar <code>.env.local</code> con los datos del capítulo 4:</p>
+<pre>VITE_SUPABASE_URL=https://abcdefghijkl.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxxxxxxxxxxxxxx</pre>
+
+  <table>
+    <thead><tr><th style="width:32%">Variable</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>VITE_SUPABASE_URL</code></td><td>URL del proyecto. La usa el login, la base y las llamadas a las funciones.</td></tr>
+      <tr><td><code>VITE_SUPABASE_ANON_KEY</code></td><td>Llave publicable. Pese al nombre, sirve tanto la <code>sb_publishable_…</code> como la <em>anon</em> clásica.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja nota">
+    <b class="tit">Se leen al compilar, no al ejecutar</b>
+    <p style="margin:0">
+      Vite incrusta estas variables en los archivos compilados. Si cambian, hay que volver a
+      compilar (<code>npm run build</code> o reconstruir la imagen de Docker). Sin ellas, la app
+      muestra «Falta configuración». <code>.env.local</code> está en <code>.gitignore</code>: nunca se
+      sube al repositorio.
+    </p>
+  </div>
+</section>
+<section>
+  <div class="cabecera"><span class="n">8</span><h2>Migrar la base de datos</h2></div>
+  <p class="lead">
+    Cuatro scripts en <code>supabase/migrations/</code> crean todo el esquema. Se aplican en orden
+    y solo una vez.
+  </p>
+  <table>
+    <thead><tr><th style="width:46%">Archivo</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><code>20260922120000_sc_init.sql</code></td><td>Tablas base (empresas, rubros, reglas, informes, cuentas, clasificaciones, memoria, validaciones, auditoría) y reglas de acceso (RLS)</td></tr>
+      <tr><td><code>20260922120100_sc_catalogo_semilla.sql</code></td><td>Catálogo provisional: 19 rubros y 34 reglas de mapeo por código PUC</td></tr>
+      <tr><td><code>20260923090000_sc_extraccion_completa.sql</code></td><td>Jerarquía completa, terceros, trazabilidad a celda y tablas de notas del archivo</td></tr>
+      <tr><td><code>20260925090000_sc_notas_hoja.sql</code></td><td>Hoja de origen de cada nota</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Opción A — con la Supabase CLI (recomendada)</h3>
+<pre><span class="c"># Una sola vez: crea supabase/config.toml (no toca migraciones ni funciones)</span>
+supabase init
+
+<span class="c"># Iniciar sesión en la CLI (abre el navegador)</span>
+supabase login
+
+<span class="c"># Vincular con el proyecto. Pide la Database password del capítulo 4</span>
+supabase link --project-ref abcdefghijkl
+
+<span class="c"># Aplicar las migraciones pendientes. Muestra la lista y pide confirmación</span>
+supabase db push</pre>
+
+  <h3>Opción B — desde el panel de Supabase</h3>
+  <p>En <strong>SQL Editor → New query</strong>, pegar y ejecutar (<strong>Run</strong>) cada archivo, en el orden de la tabla. Si más adelante se usa la CLI, registrar las cuatro versiones con <code>supabase migration repair --status applied &lt;versión&gt;</code>.</p>
+
+  <h3>Verificar</h3>
+  <p>En el SQL Editor:</p>
+<pre>select (select count(*) from sc_rubros)       as rubros,   <span class="c">-- 19</span>
+       (select count(*) from sc_reglas_mapeo) as reglas,   <span class="c">-- 34</span>
+       (select count(*) from information_schema.tables
+         where table_schema = 'public' and table_name like 'sc\_%') as tablas; <span class="c">-- 11</span></pre>
+
+  <div class="caja stop">
+    <b class="tit">No usar db push contra el proyecto de desarrollo actual</b>
+    <p style="margin:0">
+      Es un proyecto compartido con otras apps y las cuatro migraciones <strong>ya están
+      aplicadas</strong> ahí, con otras versiones: <code>db push</code> se detendría pidiendo
+      reconciliar el historial. Los cambios nuevos en ese proyecto van por el SQL Editor.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">9</span><h2>Edge Functions y secreto de Claude</h2></div>
+
+  <h3>Opción A — con la CLI</h3>
+<pre><span class="c"># El secreto. Queda disponible de inmediato, sin volver a desplegar</span>
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxx
+
+<span class="c"># Las dos funciones (exigen una sesión válida: verify_jwt activo por defecto)</span>
+supabase functions deploy sc-identificar-hojas
+supabase functions deploy sc-clasificar-cuentas
+
+<span class="c"># Comprobar</span>
+supabase secrets list
+supabase functions list</pre>
+
+  <h3>Opción B — desde el panel</h3>
+  <ol class="pasos">
+    <li><strong>Edge Functions → Secrets</strong>: agregar <code>ANTHROPIC_API_KEY</code> con la llave del capítulo 5 y guardar.</li>
+    <li><strong>Edge Functions → Deploy a new function → Via Editor</strong>.</li>
+    <li>Nombre exacto <code>sc-identificar-hojas</code>. Reemplazar el código de ejemplo por el de <code>supabase/functions/sc-identificar-hojas/index.ts</code> y desplegar.</li>
+    <li>Repetir con <code>sc-clasificar-cuentas</code>.</li>
+    <li>Dejar activa la verificación de JWT en ambas.</li>
+  </ol>
+
+  <h3>Verificar</h3>
+<pre>curl -X POST https://abcdefghijkl.supabase.co/functions/v1/sc-identificar-hojas \
+  -H "Authorization: Bearer sb_publishable_xxxx" -H "apikey: sb_publishable_xxxx" \
+  -H "content-type: application/json" -d '{"hojas":[]}'</pre>
+  <table>
+    <thead><tr><th style="width:48%">Respuesta</th><th>Significa</th></tr></thead>
+    <tbody>
+      <tr><td><code>{"error":"Payload inválido."}</code> (400)</td><td><strong>Todo bien.</strong> La función está desplegada y el secreto existe; solo rechazó el cuerpo vacío de la prueba.</td></tr>
+      <tr><td><code>…falta el secreto ANTHROPIC_API_KEY…</code> (500)</td><td>Falta el secreto: repetir <code>supabase secrets set</code>.</td></tr>
+      <tr><td>401 / <code>Invalid JWT</code></td><td>La llave del encabezado no es de este proyecto.</td></tr>
+      <tr><td>404</td><td>La función no está desplegada o el nombre no coincide.</td></tr>
+    </tbody>
+  </table>
+  <p>La prueba de punta a punta con Claude se hace desde la app: si en el paso 2 se clasifican cuentas con «Usar el modelo» marcado y ninguna regla las cubre, deben aparecer propuestas con la etiqueta <em>ia</em>.</p>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">10</span><h2>Usuarios y acceso</h2></div>
+  <p class="lead">La app no tiene pantalla de registro: los usuarios los crea el administrador.</p>
+
+  <h3>Crear un usuario</h3>
+  <ol class="pasos">
+    <li><strong>Authentication → Users → Add user → Create new user</strong>.</li>
+    <li>Correo y contraseña. Marcar <strong>Auto Confirm User</strong> para que pueda entrar de inmediato.</li>
+    <li>Entregar las credenciales por un canal seguro.</li>
+  </ol>
+
+  <h3>Cerrar el registro público — obligatorio</h3>
+  <p>
+    En <strong>Authentication → Sign In / Providers</strong>, desactivar <strong>Allow new users to sign up</strong>.
+  </p>
+  <div class="caja stop">
+    <b class="tit">Por qué es obligatorio</b>
+    <p style="margin:0">
+      Las reglas de acceso dan acceso completo a cualquier usuario con sesión. Con el registro
+      abierto, cualquiera que conozca la URL y la llave publicable (ambas visibles en la app) podría
+      crearse una cuenta por la API y leer la información financiera de los clientes.
+    </p>
+  </div>
+
+  <h3>Opcional</h3>
+  <p>En <strong>Authentication → URL Configuration</strong>, poner como <em>Site URL</em> el dominio de la app. Lo usan los correos de recuperación de contraseña.</p>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">11</span><h2>Probar en local</h2></div>
+<pre><span class="c"># Servidor de desarrollo en http://localhost:5199</span>
+npm run dev
+
+<span class="c"># Prueba del núcleo: 197 comprobaciones sobre libros sintéticos (sin red ni base)</span>
+npx esbuild scripts/prueba-nucleo.ts --bundle --platform=node --format=cjs \
+  --outfile=/tmp/prueba.cjs &amp;&amp; node /tmp/prueba.cjs
+
+<span class="c"># Diagnóstico de un Excel real: qué clasifica y extrae, sin escribir nada</span>
+npx esbuild scripts/diagnostico-archivo.ts --bundle --platform=node --format=cjs \
+  --outfile=/tmp/diag.cjs &amp;&amp; node /tmp/diag.cjs "ruta/al/archivo.xlsx"</pre>
+  <p>Recorrido mínimo antes de publicar:</p>
+  <ol class="pasos">
+    <li>Entrar con un usuario creado en el capítulo 10.</li>
+    <li>Cargar un Excel real. La clasificación de hojas debe quedar completa, sin revisión pendiente.</li>
+    <li>Revisar los tres tabs y las validaciones. Continuar.</li>
+    <li>Clasificar las cuentas, confirmar y ver los estados. <em>Activo = Pasivo + Patrimonio</em> debe cuadrar.</li>
+    <li>Aprobar y descargar el Excel.</li>
+  </ol>
+</section>
+<section>
+  <div class="cabecera"><span class="n">12</span><h2>Publicar el frontend</h2></div>
+  <p class="lead">
+    El repositorio trae un <code>Dockerfile</code> de dos etapas: compila con Node 20 y sirve los
+    archivos con nginx. El <code>docker-compose.yml</code> está pensado para correr detrás de un
+    proxy inverso que da el dominio y el HTTPS.
+  </p>
+
+  <h3>En el servidor (Linux con Docker)</h3>
+<pre><span class="c"># 1. Traer el código</span>
+git clone https://github.com/ivanclabe/susconsultores-estados-financieros.git
+cd susconsultores-estados-financieros
+
+<span class="c"># 2. Variables: se incrustan al compilar la imagen</span>
+cp .env.example .env.local
+nano .env.local            <span class="c"># VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY</span>
+
+<span class="c"># 3. La red "web" del proxy inverso (solo si no existe)</span>
+docker network create web
+
+<span class="c"># 4. Compilar y levantar</span>
+docker compose up -d --build</pre>
+
+  <table>
+    <thead><tr><th style="width:30%">Pieza</th><th>Comportamiento</th></tr></thead>
+    <tbody>
+      <tr><td><code>Dockerfile</code></td><td><code>npm ci</code> y <code>npm run build</code> en <code>node:20-alpine</code>; copia <code>dist/</code> a <code>nginx:alpine</code>.</td></tr>
+      <tr><td><code>nginx.conf</code></td><td>Puerto 80, gzip, caché larga para <code>/assets/</code>, <code>index.html</code> sin caché (cada despliegue se ve de inmediato) y respaldo a <code>index.html</code>.</td></tr>
+      <tr><td><code>docker-compose.yml</code></td><td>Un servicio en la red externa <code>web</code>, <strong>sin puertos publicados</strong>: el proxy inverso (Traefik, Caddy, nginx-proxy…) lo alcanza por esa red y se encarga del dominio y el certificado.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caja nota">
+    <b class="tit">Sin proxy inverso</b>
+    <p style="margin:0">
+      Para exponer el contenedor directamente, agregar al servicio
+      <code>ports: ["8080:80"]</code> y quitar la red externa. Así queda sin HTTPS: sirve para
+      pruebas internas, no para producción.
+    </p>
+  </div>
+
+  <h3>Actualizar a una versión nueva</h3>
+<pre>git pull
+docker compose up -d --build</pre>
+  <p>Si la versión trae migraciones o cambios en las funciones, aplicarlos antes (capítulos 8 y 9).</p>
+
+  <h3>Alternativa: hosting estático</h3>
+  <p>
+    En Netlify, Vercel, Cloudflare Pages o similar: comando de build <code>npm run build</code>,
+    carpeta de salida <code>dist</code>, y las dos variables <code>VITE_…</code> configuradas en el
+    panel del servicio. La app no usa rutas, así que no necesita reglas de reescritura.
+  </p>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">13</span><h2>Operación y mantenimiento</h2></div>
+  <table>
+    <thead><tr><th style="width:28%">Tarea</th><th>Cómo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ver errores de la IA</strong></td><td>Panel de Supabase → <strong>Edge Functions</strong> → la función → <strong>Logs</strong>.</td></tr>
+      <tr><td><strong>Consumo de Claude</strong></td><td>Consola de Anthropic → <strong>Usage</strong>. Solo hay llamadas cuando las reglas no alcanzan.</td></tr>
+      <tr><td><strong>Rotar la llave de Claude</strong></td><td>Crear una nueva en la consola, <code>supabase secrets set ANTHROPIC_API_KEY=…</code> y borrar la anterior. No requiere volver a desplegar.</td></tr>
+      <tr><td><strong>Cambiar de modelo</strong></td><td>Editar la constante <code>MODELO</code> de las dos funciones y volver a desplegarlas.</td></tr>
+      <tr><td><strong>Cambio de esquema</strong></td><td><code>supabase migration new nombre</code>, escribir el SQL, <code>supabase db push</code>. Nunca editar una migración ya aplicada.</td></tr>
+      <tr><td><strong>Respaldos</strong></td><td>Los planes pagos de Supabase hacen copias diarias. En el gratuito: <code>supabase db dump -f respaldo.sql</code> periódicamente.</td></tr>
+      <tr><td><strong>Usuarios</strong></td><td><strong>Authentication → Users</strong>: crear, restablecer contraseña o eliminar.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Reemplazar el catálogo institucional</h3>
+  <p>
+    El catálogo que viene con la app es <strong>provisional</strong>: está armado sobre el PUC
+    colombiano. El de SusConsultores se carga en las tablas <code>sc_rubros</code> (rubros, sección,
+    número de nota, orden) y <code>sc_reglas_mapeo</code> (prefijo PUC → rubro). La app lo lee al
+    iniciar sesión: no hay que tocar código.
+  </p>
+<pre><span class="c">-- Ejemplo: renombrar un rubro y moverlo de nota</span>
+update sc_rubros
+   set nombre = 'Efectivo y equivalentes de efectivo', nota_numero = 4, origen = 'susconsultores'
+ where codigo = 'EFECTIVO';
+
+<span class="c">-- Ejemplo: una regla nueva, más específica (gana el prefijo más largo)</span>
+insert into sc_reglas_mapeo (prefijo, rubro_codigo, prioridad, origen)
+values ('1330', 'OTROS_ACT_CTE', 10, 'susconsultores');</pre>
+  <p>Las secciones válidas del Estado de Situación Financiera son <code>activo_corriente</code>, <code>activo_no_corriente</code>, <code>pasivo_corriente</code>, <code>pasivo_no_corriente</code> y <code>patrimonio</code>. Las del Estado de Resultados son <code>ingresos</code>, <code>costos</code>, <code>gastos</code>, <code>otros_ingresos</code>, <code>otros_gastos</code> e <code>impuesto</code>.</p>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">14</span><h2>Seguridad y problemas conocidos</h2></div>
+  <p class="lead">Lo que conviene resolver antes de usar la app con información real de clientes.</p>
+  <table>
+    <thead><tr><th style="width:27%">Tema</th><th style="width:40%">Situación</th><th>Qué hacer</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Proyecto compartido</strong></td>
+          <td>El proyecto de desarrollo también aloja otras cuatro apps con sus propios usuarios. Como las reglas dan acceso a cualquier usuario con sesión, <strong>los usuarios de esas apps podrían leer los datos de SusConsultores</strong>.</td>
+          <td>Producción en un proyecto dedicado (capítulo 4).</td></tr>
+      <tr><td><strong>Registro público</strong></td>
+          <td>Si queda activo, cualquiera puede crearse una cuenta y leer todo.</td>
+          <td>Desactivarlo (capítulo 10).</td></tr>
+      <tr><td><strong>Funciones de IA sin sesión</strong></td>
+          <td>Las funciones aceptan la llave publicable aunque no haya sesión, así que alguien con la app podría llamarlas y gastar créditos.</td>
+          <td>Límite de gasto en Anthropic (capítulo 5). Mejora pendiente: que la función verifique que hay un usuario con sesión.</td></tr>
+      <tr><td><strong>Sin <code>.dockerignore</code></strong></td>
+          <td><code>COPY . .</code> copia también <code>node_modules</code> y <code>dist</code> locales. Compilando en un Mac con dependencias instaladas, los binarios de macOS pisan los de Linux y el build puede fallar.</td>
+          <td>Compilar desde un clon limpio en el servidor, o agregar un <code>.dockerignore</code> con <code>node_modules</code> y <code>dist</code>. <strong>No</strong> excluir <code>.env.local</code>: de ahí salen las variables del build.</td></tr>
+      <tr><td><strong>Nombres heredados</strong></td>
+          <td>El servicio de <code>docker-compose.yml</code> se llama <code>dark-kitchen</code>, y los comentarios de <code>nginx.conf</code> mencionan rutas de otra app.</td>
+          <td>Renombrar el servicio (por ejemplo, <code>sus-consultores</code>) y ajustar la regla del proxy. Los comentarios no afectan el funcionamiento.</td></tr>
+      <tr><td><strong>Informes de prueba</strong></td>
+          <td>En la base de desarrollo quedan tres informes creados con una versión anterior de la extracción, con datos incorrectos.</td>
+          <td>Descartarlos. No existen en un proyecto nuevo.</td></tr>
+      <tr><td><strong>Plan gratuito</strong></td>
+          <td>Supabase pausa el proyecto tras una semana sin actividad y no hace respaldos.</td>
+          <td>Plan pago para producción, o respaldos manuales.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="cabecera"><span class="n">15</span><h2>Lista de verificación</h2></div>
+  <table class="check">
+    <tbody>
+      <tr><td>☐</td><td>Acceso al repositorio de GitHub.</td></tr>
+      <tr><td>☐</td><td>Proyecto de Supabase <strong>dedicado</strong>, con la contraseña de la base guardada.</td></tr>
+      <tr><td>☐</td><td>Cuenta de Anthropic con créditos, límite de gasto y llave guardada.</td></tr>
+      <tr><td>☐</td><td><code>npm ci</code> y <code>npm run typecheck</code> sin errores.</td></tr>
+      <tr><td>☐</td><td><code>.env.local</code> con la URL y la llave publicable.</td></tr>
+      <tr><td>☐</td><td>Las cuatro migraciones aplicadas; la verificación da 19 rubros, 34 reglas y 11 tablas.</td></tr>
+      <tr><td>☐</td><td>Secreto <code>ANTHROPIC_API_KEY</code> cargado y las dos funciones desplegadas; la prueba con <code>curl</code> responde «Payload inválido».</td></tr>
+      <tr><td>☐</td><td>Registro público <strong>desactivado</strong> y usuarios creados a mano.</td></tr>
+      <tr><td>☐</td><td>Prueba del núcleo: 197 comprobaciones correctas.</td></tr>
+      <tr><td>☐</td><td>Recorrido completo con un Excel real: carga, clasificación de hojas, clasificación de cuentas, estados, aprobación, descarga.</td></tr>
+      <tr><td>☐</td><td>Frontend publicado con HTTPS.</td></tr>
+      <tr><td>☐</td><td>Catálogo institucional de SusConsultores cargado (o confirmado el provisional).</td></tr>
+      <tr><td>☐</td><td>SusConsultores autorizó enviar nombres de cuentas a Claude.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</body>
+</html>

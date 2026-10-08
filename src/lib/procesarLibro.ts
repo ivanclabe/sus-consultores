@@ -318,7 +318,8 @@ function validarNotas(
     codigo: 'E-10',
     titulo: `Las hojas de notas tienen columnas de ${yA} y de ${yB}`,
     ok: conNotas.length > 0 && sinColumnas.length === 0,
-    bloqueante: true,
+    // Las notas del archivo son referencia: el informe arma las suyas desde el balance.
+    bloqueante: false,
     detalle:
       sinColumnas.length === 0
         ? conNotas
@@ -342,10 +343,11 @@ function validarNotas(
     codigo: 'E-11',
     titulo: 'Se extrajeron las notas',
     ok: notas.notas.length > 0 && notas.erroresCelda.length === 0,
-    bloqueante: true,
+    bloqueante: false,
     detalle:
       notas.notas.length === 0
-        ? `No se encontró ningún encabezado de nota en ${notas.hojas.map((h) => `«${h}»`).join(', ')}.`
+        ? `No se encontró ningún encabezado de nota en ${notas.hojas.map((h) => `«${h}»`).join(', ')}. ` +
+          'Puedes continuar: las notas del informe se arman desde el balance.'
         : notas.erroresCelda.length > 0
           ? `Celdas con error en las notas: ${lista(notas.erroresCelda)}.`
           : `${notas.notas.length} notas, ${notas.notas.reduce((s, n) => s + n.lineas.length, 0)} líneas` +

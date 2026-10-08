@@ -27,6 +27,12 @@ export interface Empresa {
   id: string
   nombre: string
   nit: string | null
+  ciudad?: string | null
+  representante_legal?: string | null
+  contador?: string | null
+  tarjeta_contador?: string | null
+  revisor_fiscal?: string | null
+  tarjeta_revisor?: string | null
 }
 
 export interface Informe {
@@ -40,6 +46,7 @@ export interface Informe {
   periodo_anterior: number | null
   estado: 'borrador' | 'en_revision' | 'aprobado'
   mapeo_columnas: unknown
+  encabezado?: import('./empresaArchivo').Encabezado | null
   created_at: string
   aprobado_at: string | null
 }
